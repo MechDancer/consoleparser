@@ -1,11 +1,10 @@
 package org.mechdancer.console.parser
 
 import org.mechdancer.console.parser.TokenType.*
+import org.mechdancer.console.parser.TokenType.Number
 
 typealias Sentence = List<Token>          //句子
-typealias Examples = List<String>         //示例库
 typealias Function = (Sentence) -> Result //执行器
-typealias Library = Map<Int, Function>    //函数库
 
 //解析正则
 private infix fun String.match(token: TokenType) =
