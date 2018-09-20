@@ -1,14 +1,14 @@
 package org.mechdancer.console.parser
 
 import org.mechdancer.console.parser.TokenType.*
-import java.lang.StringBuilder
+import org.mechdancer.console.parser.TokenType.Number
 import java.util.regex.Pattern
 
 /**
  * 规则
  * 定义为一个编号和一个示例
  */
-class Rule(val id: Int, val example: Sentence) {
+class Rule(val example: Sentence, val help: String) {
 	/**
 	 * 维数
 	 * 即示例的长度
@@ -36,11 +36,12 @@ class Rule(val id: Int, val example: Sentence) {
 		return sentence.size
 	}
 
-	override fun toString(): String {
-		val builder = StringBuilder("#$id:")
-		example.forEach { builder.append(" ${it.type.name}") }
-		return builder.toString()
-	}
+	override fun toString() =
+		StringBuilder().apply {
+			example.forEach { append("${it.type.name} ") }
+			append("\n")
+			append(help)
+		}.toString()
 
 	companion object {
 		private val patten = Pattern.compile("(^#(\\d+):\\s*([\\s|\\S]+)$)")
@@ -49,11 +50,11 @@ class Rule(val id: Int, val example: Sentence) {
 		 * 生成器
 		 * 从示例句构造规则
 		 */
-		fun build(example: String): Rule {
+		fun build(example: String): Pair<Int, Sentence> {
 			val m = patten.matcher(example)
 			if (!m.find() || m.groupCount() != 3) //[整体][id][body]
 				throw IllegalArgumentException("failed to build a rule by example: $example")
-			return Rule(m.group(2).toInt(), m.group(3).split().cleanup())
+			return m.group(2).toInt() to m.group(3).split().cleanup()
 		}
 	}
 }

@@ -6,19 +6,21 @@ import org.mechdancer.console.parser.Result.State.*
  * 语义分析和执行器
  */
 class Parser {
-	private val rules = mutableListOf<Rule>()
+	private val rules = mutableMapOf<Int, Rule>()
 	private val library = mutableMapOf<Int, Function>()
 
 	/** 添加规则 */
 	infix fun access(example: String) {
-		if (example.isNotBlank())
-			rules += Rule.build(example)
+		if (example.isNotBlank()) {
+			val (id, sentence) = Rule.build(example)
+			rules[id] = Rule(sentence, example)
+		}
 	}
 
 	/** 添加规则 */
 	operator fun set(id: Int, example: String) {
 		if (example.isNotBlank())
-			rules += Rule(id, example.split().cleanup())
+			rules[id] = Rule(example.split().cleanup(), example)
 	}
 
 	/** 添加动作 */
@@ -29,9 +31,11 @@ class Parser {
 	/** 添加规则和动作 */
 	operator fun set(example: String, function: Function) {
 		if (example.isBlank()) return
-		val id = library.keys.max() ?: 0
-		this[id] = example
-		this[id] = function
+		((library.keys.max() ?: 0) + 1)
+			.let { id ->
+				this[id] = example
+				this[id] = function
+			}
 	}
 
 	/** 解析并执行指令 */
@@ -48,9 +52,12 @@ class Parser {
 				Failure    -> println(result.info)
 				Error      -> {
 					print("invalid command: ")
-					sentence.dropLast(1).forEachIndexed { i, it ->
-						print(if (i == result.where) "> ${it.text} < " else it.text)
-					}
+					sentence
+						.dropLast(1)
+						.map { it.text }
+						.forEachIndexed { i, text ->
+							print(if (i == result.where) "> $text < " else "$text ")
+						}
 					println()
 				}
 				Incomplete -> {
@@ -62,36 +69,41 @@ class Parser {
 		}
 	}
 
+	/** 将操作打包，以便在实际执行之前插入检查等操作 */
+	infix fun pack(command: String) = { invoke(command) }
+
 	private companion object {
-		val Int.notFound get() = "no function bind id[$this]"
+		//指令不完整
 		const val ambiguous = "there are more than one rules match this sentence, please check your rules"
+
+		//判断多个元素相等
+		@JvmStatic
+		fun <T> equal(vararg list: T) =
+			list.size < 2 || (0 until list.size - 1).all { list[it] == list[it + 1] }
 	}
 
 	private fun parse(sentence: Sentence): Result {
 		//匹配长度表
-		val lengths = rules.associate { it to it[sentence] }
+		val lengths = rules.mapValues { it.value[sentence] }
 		//完全匹配表
-		val success = rules.filter {
-			sentence.size == it.dim && sentence.size == lengths[it]
-		}
+		val success = rules.filter { equal(sentence.size, it.value.dim, lengths[it.key]) }.keys
 		return when {
 			//唯一匹配
 			success.size == 1 -> {
-				success.first().id.let {
+				success.first().let {
 					library[it]
 						?.invoke(sentence)
-						?: Result(it.notFound, false)
+						?: Result("no function bind rule \"${rules[it]}]\"", false)
 				}
 			}
 			//歧义匹配
-			success.size > 1  ->
-				Result(ambiguous, false)
+			success.size > 1  -> Result(ambiguous, false)
 			//无法匹配
 			else              ->
 				lengths.maxBy { it.value }?.let { best ->
-					if (sentence.size - 1 == best.value //句子除了结束符全部匹配
+					if (sentence.size == 1 + best.value //句子除了结束符全部匹配
 						&&                              //不能匹配结束符是因为规则比句子长
-						sentence.size < best.key.dim)
+						sentence.size < rules[best.key]?.dim ?: 0)
 						Result(Incomplete)
 					else
 						Result(Error, best.value)
