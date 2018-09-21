@@ -45,27 +45,30 @@ class Parser {
 		if (sentence.size == 1) return
 		//匹配
 		val result = parse(sentence)
-		//反馈：默认在错误流输出
-		with(System.err) {
-			when (result.what) {
-				Success    -> System.out.println(result.info)
-				Failure    -> println(result.info)
-				Error      -> {
-					print("invalid command: ")
-					sentence
-						.dropLast(1)
-						.map { it.text }
-						.forEachIndexed { i, text ->
-							print(if (i == result.where) "> $text < " else "$text ")
-						}
-					println()
-				}
-				Incomplete -> {
-					print("incomplete command: ")
-					sentence.dropLast(1).forEach { print("${it.text} ") }
-					println("...")
+		//反馈
+		if (result.positive) println(result.info)
+		else {
+			val info = StringBuilder().apply {
+				when (result.what) { //默认在错误流输出
+					Success    -> Unit
+					Failure    -> append(result.info)
+					Error      -> {
+						append("invalid command: ")
+						sentence
+							.dropLast(1)
+							.map { it.text }
+							.forEachIndexed { i, text ->
+								append(if (i == result.where) "> $text < " else "$text ")
+							}
+					}
+					Incomplete -> {
+						append("incomplete command: ")
+						sentence.dropLast(1).forEach { append("${it.text} ") }
+						append("...")
+					}
 				}
 			}
+			System.err.println(info)
 		}
 	}
 
@@ -74,7 +77,10 @@ class Parser {
 
 	private companion object {
 		//指令不完整
-		const val ambiguous = "there are more than one rules match this sentence, please check your rules"
+		const val ambiguousText = "there are more than one rules match this sentence, please check your rules"
+
+		//规则集空
+		val noRule = Result(Error, "no rule")
 
 		//判断多个元素相等
 		@JvmStatic
@@ -82,32 +88,40 @@ class Parser {
 			list.size < 2 || (0 until list.size - 1).all { list[it] == list[it + 1] }
 	}
 
+	//匹配成功，执行
+	private fun success(sentence: Sentence, best: Int) =
+		library[best]?.invoke(sentence)?.let(::Result)
+			?: Result(Error, "no function bind rule \"${rules[best]}]\"")
+
+	//有多个指令匹配
+	private fun ambiguous(list: Iterable<Int>) =
+		Result(Error, ambiguousText)
+
+	//无任何规则匹配
+	private fun none(size: Int, best: Map.Entry<Int, Int>) =
+	//句子除了结束符全部匹配 && 不能匹配结束符是因为规则比句子长
+		if (size == 1 + best.value && size < rules[best.key]!!.dim)
+			Result(Incomplete)
+		else
+			Result(Error, "", best.value)
+
+	//解析指令
 	private fun parse(sentence: Sentence): Result {
 		//匹配长度表
 		val lengths = rules.mapValues { it.value[sentence] }
 		//完全匹配表
-		val success = rules.filter { equal(sentence.size, it.value.dim, lengths[it.key]) }.keys
+		val perfect = rules.filter { equal(sentence.size, it.value.dim, lengths[it.key]) }.keys
+		//最佳匹配项
+		val best = lengths.maxBy { it.value }
 		return when {
 			//唯一匹配
-			success.size == 1 -> {
-				success.first().let {
-					library[it]
-						?.invoke(sentence)
-						?: Result("no function bind rule \"${rules[it]}]\"", false)
-				}
-			}
+			perfect.size == 1 -> success(sentence, perfect.first())
 			//歧义匹配
-			success.size > 1  -> Result(ambiguous, false)
+			perfect.size > 1  -> ambiguous(perfect)
 			//无法匹配
-			else              ->
-				lengths.maxBy { it.value }?.let { best ->
-					if (sentence.size == 1 + best.value //句子除了结束符全部匹配
-						&&                              //不能匹配结束符是因为规则比句子长
-						sentence.size < rules[best.key]?.dim ?: 0)
-						Result(Incomplete)
-					else
-						Result(Error, best.value)
-				} ?: Result(Error, 0, "no rule")
+			best != null      -> none(sentence.size, best)
+			//规则集空
+			else              -> noRule
 		}
 	}
 }

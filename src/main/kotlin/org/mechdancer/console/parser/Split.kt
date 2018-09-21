@@ -3,8 +3,8 @@ package org.mechdancer.console.parser
 import org.mechdancer.console.parser.TokenType.*
 import org.mechdancer.console.parser.TokenType.Number
 
-typealias Sentence = List<Token>          //句子
-typealias Function = (Sentence) -> Result //执行器
+typealias Sentence = List<Token>
+typealias Function = (Sentence) -> Pair<Boolean, String>
 
 //解析正则
 private infix fun String.match(token: TokenType) =

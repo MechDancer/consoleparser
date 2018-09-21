@@ -1,18 +1,22 @@
 package org.mechdancer.console.parser
 
-import org.mechdancer.console.parser.Result.State.*
+import org.mechdancer.console.parser.Result.State.Failure
+import org.mechdancer.console.parser.Result.State.Success
 
 /**
  * 指令执行结果
  */
 data class Result(
 	val what: State,
-	val where: Int = 0,
-	val info: String = ""
+	val info: String = "",
+	val where: Int = 0
 ) {
 	//指令执行结果
-	constructor(info: String, success: Boolean = true)
-		: this(if (success) Success else Failure, 0, info)
+	constructor(pair: Pair<Boolean, String>)
+		: this(if (pair.first) Success else Failure, pair.second)
+
+	/** 是否成功 */
+	val positive get() = what == Success
 
 	/**
 	 * 指令执行状态
