@@ -3,6 +3,7 @@ package org.mechdancer.console.parser
 typealias Sentence = List<Token<*>>
 typealias Action = Sentence.() -> Pair<Boolean, Any?>
 typealias Rule = Sentence
+typealias Library = Map<Rule, Action>
 
 /**
  * 维数
@@ -25,9 +26,8 @@ operator fun Rule.get(sentence: Sentence): Int {
  * 以规则形式展示
  */
 fun Rule.ruleView() =
-	if (size <= 2) "\"${first()}\""
-	else StringBuilder("\"").apply {
-		this@ruleView.dropLast(1).forEach { append("$it ") }
+	StringBuilder("\"").apply {
+		this@ruleView.forEach { append("$it ") }
 		deleteCharAt(lastIndex)
 		append("\"")
 	}.toString()

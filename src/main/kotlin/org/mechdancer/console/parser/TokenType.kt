@@ -3,7 +3,7 @@ package org.mechdancer.console.parser
 private val dec = "(^[-+]?\\d+$)".toRegex()
 private val hex = "(^[-+]?0x[a-fA-F0-9]+$)".toRegex()
 private val num = "(^[-+]?\\d*\\.\\d+$)".toRegex()
-private val sign = "(^[^a-zA-Z]$)".toRegex()
+private val sign = "(^[^a-zA-Z]+$)".toRegex()
 private val note = "(^\\[-\\D+-]$)".toRegex()
 private val finalNote = "(^\\[-\\D+$)".toRegex()
 private val key = "(^\\{\\D+}$)".toRegex()

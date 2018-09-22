@@ -10,6 +10,7 @@ private infix fun String.match(token: TokenType) =
 //类别判定
 private fun determine(text: String, erase: Boolean): Token<*>? =
 	when {
+		text.isBlank()     -> null
 		text match Integer -> Token(Integer, text.takeUnless { erase }?.toInt())
 		text match Number  -> Token(Number, text.takeUnless { erase }?.toDouble())
 		text match Note    -> if (!erase) Token(Note, text) else null
@@ -22,16 +23,9 @@ private fun determine(text: String, erase: Boolean): Token<*>? =
 				"sign" -> Token(Sign)
 				else   -> Token(Key)
 			}
-		text.length == 1 && text match Sign
-		                   -> Token(Sign, text)
+		text match Sign    -> Token(Sign, text)
 		else               -> Token(Word, text)
 	}
-
-private fun Sequence<Token<*>>.changeTail() =
-	takeWhile { it.type != Final }
-		.toMutableList()
-		.apply { add(Token<Unit>(Final)) }
-		.toList()
 
 /** 拆分 */
 fun String.split(erase: Boolean) =
@@ -40,12 +34,12 @@ fun String.split(erase: Boolean) =
 /** 擦除 */
 fun String.erase() =
 	split(true)
-		.asSequence()
-		.changeTail()
+		.takeWhile { it.type != Final }
 
 /** 整理 */
 fun String.cleanup() =
 	split(false)
 		.asSequence()
 		.filter { it.type != Note }
-		.changeTail()
+		.takeWhile { it.type != Final }
+		.toList()
