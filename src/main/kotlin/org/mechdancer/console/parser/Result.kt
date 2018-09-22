@@ -12,8 +12,8 @@ data class Result(
 	val where: Int = 0
 ) {
 	//指令执行结果
-	constructor(pair: Pair<Boolean, String>)
-		: this(if (pair.first) Success else Failure, pair.second)
+	constructor(pair: Pair<Boolean, Any?>)
+		: this(if (pair.first) Success else Failure, pair.second.toString())
 
 	/** 是否成功 */
 	val positive get() = what == Success

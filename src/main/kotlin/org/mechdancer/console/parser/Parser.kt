@@ -6,42 +6,25 @@ import org.mechdancer.console.parser.Result.State.*
  * 语义分析和执行器
  */
 class Parser {
-	private val rules = mutableMapOf<Int, Rule>()
-	private val library = mutableMapOf<Int, Function>()
+	//规则-动作表
+	private val library = mutableMapOf<Rule, Action>()
 
-	/** 添加规则 */
-	infix fun access(example: String) {
-		if (example.isNotBlank()) {
-			val (id, sentence) = Rule.build(example)
-			rules[id] = Rule(sentence, example)
-		}
-	}
-
-	/** 添加规则 */
-	operator fun set(id: Int, example: String) {
-		if (example.isNotBlank())
-			rules[id] = Rule(example.split().cleanup(), example)
-	}
-
-	/** 添加动作 */
-	operator fun set(id: Int, function: Function) {
-		library[id] = function
-	}
+	//检查规则是否已经存在
+	private fun check(sentence: Sentence) =
+		sentence.size > 1 && library.keys.none { equal(sentence.size, it.dim, it[sentence]) }
 
 	/** 添加规则和动作 */
-	operator fun set(example: String, function: Function) {
-		if (example.isBlank()) return
-		((library.keys.max() ?: 0) + 1)
-			.let { id ->
-				this[id] = example
-				this[id] = function
-			}
+	operator fun set(example: String, action: Action) {
+		example.erase()
+			.takeIf(::check)
+			?.let { library[it] = action }
+			?: throw RuntimeException("rule \"$example\" already exist")
 	}
 
 	/** 解析并执行指令 */
 	operator fun invoke(command: String) {
 		//分词
-		val sentence = command.split().cleanup()
+		val sentence = command.cleanup()
 		if (sentence.size == 1) return
 		//匹配
 		val result = parse(sentence)
@@ -60,20 +43,25 @@ class Parser {
 							.forEachIndexed { i, text ->
 								append(if (i == result.where) "> $text < " else "$text ")
 							}
+						if (result.info.isNotBlank()) {
+							appendln()
+							append(result.info)
+						}
 					}
 					Incomplete -> {
 						append("incomplete command: ")
 						sentence.dropLast(1).forEach { append("${it.text} ") }
 						append("...")
+						if (result.info.isNotBlank()) {
+							appendln()
+							append(result.info)
+						}
 					}
 				}
 			}
 			System.err.println(info)
 		}
 	}
-
-	/** 将操作打包，以便在实际执行之前插入检查等操作 */
-	infix fun pack(command: String) = { invoke(command) }
 
 	private companion object {
 		//指令不完整
@@ -86,42 +74,39 @@ class Parser {
 		@JvmStatic
 		fun <T> equal(vararg list: T) =
 			list.size < 2 || (0 until list.size - 1).all { list[it] == list[it + 1] }
+
+		//无任何规则完全匹配
+		@JvmStatic
+		fun cannotMatch(size: Int, best: Map.Entry<Rule, Int>): Result {
+			//最佳匹配规则-匹配长度
+			val (rule, length) = best
+			//句子除了结束符全部匹配 && 不能匹配结束符是因为规则比句子长
+			return if (size == 1 + length && size < rule.dim)
+				Result(Incomplete, rule.tip)
+			else if (length == 0)
+				Result(Error, "no rule matched", length)
+			else
+				Result(Error, rule.tip, length)
+		}
 	}
-
-	//匹配成功，执行
-	private fun success(sentence: Sentence, best: Int) =
-		library[best]?.invoke(sentence)?.let(::Result)
-			?: Result(Error, "no function bind rule \"${rules[best]}]\"")
-
-	//有多个指令匹配
-	private fun ambiguous(list: Iterable<Int>) =
-		Result(Error, ambiguousText)
-
-	//无任何规则匹配
-	private fun none(size: Int, best: Map.Entry<Int, Int>) =
-	//句子除了结束符全部匹配 && 不能匹配结束符是因为规则比句子长
-		if (size == 1 + best.value && size < rules[best.key]!!.dim)
-			Result(Incomplete)
-		else
-			Result(Error, "", best.value)
 
 	//解析指令
 	private fun parse(sentence: Sentence): Result {
 		//匹配长度表
-		val lengths = rules.mapValues { it.value[sentence] }
+		val lengths = library.mapValues { it.key[sentence] }
 		//完全匹配表
-		val perfect = rules.filter { equal(sentence.size, it.value.dim, lengths[it.key]) }.keys
-		//最佳匹配项
-		val best = lengths.maxBy { it.value }
+		val perfect = library.filter { equal(sentence.size, it.key.dim, lengths[it.key]) }
 		return when {
 			//唯一匹配
-			perfect.size == 1 -> success(sentence, perfect.first())
+			perfect.size == 1 -> perfect.values.first()(sentence).let(::Result)
 			//歧义匹配
-			perfect.size > 1  -> ambiguous(perfect)
-			//无法匹配
-			best != null      -> none(sentence.size, best)
-			//规则集空
-			else              -> noRule
+			perfect.size > 1  -> throw RuntimeException(ambiguousText)
+			//无任何规则完全匹配
+			else              ->
+				lengths
+					.maxBy { it.value }
+					?.let { best -> cannotMatch(sentence.size, best) }
+					?: noRule
 		}
 	}
 }

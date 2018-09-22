@@ -3,43 +3,49 @@ package org.mechdancer.console.parser
 import org.mechdancer.console.parser.TokenType.*
 import org.mechdancer.console.parser.TokenType.Number
 
-typealias Sentence = List<Token>
-typealias Function = (Sentence) -> Pair<Boolean, String>
-
 //解析正则
 private infix fun String.match(token: TokenType) =
 	token.pattens.any { it.matchEntire(this) != null }
 
 //类别判定
-private fun determine(text: String): TokenType =
+private fun determine(text: String, erase: Boolean): Token<*>? =
 	when {
-		text match Integer -> Integer
-		text match Number  -> Number
-		text match Note    -> Note
-		text match Final   -> Final
+		text match Integer -> Token(Integer, text.takeUnless { erase }?.toInt())
+		text match Number  -> Token(Number, text.takeUnless { erase }?.toDouble())
+		text match Note    -> if (!erase) Token(Note, text) else null
+		text match Final   -> Token(Final, text.takeUnless { erase })
 		text match Key     ->
 			when (text.substring(1 until text.length - 1)) {
-				"int"  -> Integer
-				"num"  -> Number
-				"word" -> Word
-				"sign" -> Sign
-				else   -> Key
+				"int"  -> Token<Unit>(Integer)
+				"num"  -> Token(Number)
+				"word" -> Token(Word)
+				"sign" -> Token(Sign)
+				else   -> Token(Key)
 			}
 		text.length == 1 && text match Sign
-		                   -> Sign
-		else               -> Word
+		                   -> Token(Sign, text)
+		else               -> Token(Word, text)
 	}
 
-/** 拆分 */
-fun String.split() =
-	trim().split(Regex("\\s+"))
-		.map { Token(it, determine(it)) }
-
-/** 清理 */
-fun Sentence.cleanup() =
-	asSequence()
-		.filter { it.type != Note }
-		.takeWhile { it.type != Final }
+private fun Sequence<Token<*>>.changeTail() =
+	takeWhile { it.type != Final }
 		.toMutableList()
-		.apply { add(Token("", Final)) }
+		.apply { add(Token<Unit>(Final)) }
 		.toList()
+
+/** 拆分 */
+fun String.split(erase: Boolean) =
+	trim().split(Regex("\\s+")).mapNotNull { determine(it, erase) }
+
+/** 擦除 */
+fun String.erase() =
+	split(true)
+		.asSequence()
+		.changeTail()
+
+/** 整理 */
+fun String.cleanup() =
+	split(false)
+		.asSequence()
+		.filter { it.type != Note }
+		.changeTail()

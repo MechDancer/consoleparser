@@ -19,5 +19,5 @@ enum class TokenType(vararg val pattens: Regex) {
 	Word,
 	Final(finalNote),
 	Note(note),
-	Key(key);
+	Key(key)
 }
