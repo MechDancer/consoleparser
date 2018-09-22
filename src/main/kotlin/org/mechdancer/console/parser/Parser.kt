@@ -1,24 +1,45 @@
 package org.mechdancer.console.parser
 
 import org.mechdancer.console.parser.Result.State.*
+import org.mechdancer.console.parser.TokenType.Sign
 
 /**
  * 语义分析和执行器
  */
 class Parser {
-	//规则-动作表
-	private val library = mutableMapOf<Rule, Action>()
+	//用户指令集
+	private val userLibrary = mutableMapOf<Rule, Action>()
+	//内部指令集
+	private val coreLibrary = mapOf<Rule, (Sentence, Map<Rule, Matcher>) -> Pair<Boolean, Any>>(
+		"help".erase() to { sentence, matchers ->
+			val maybe = matchers.filter { it.value.length == sentence.size }
+			if (maybe.isEmpty())
+				cannotMatch
+			else
+				true to StringBuilder().apply {
+					maybe.keys.forEach { appendln(it.ruleView()) }
+				}
+		},
+		"do".erase() to { sentence, matchers ->
+			feedback(sentence, parse(sentence, matchers))
+		}
+	)
 
 	/** 指令分析 */
-//	abstract fun analyze(command: String): Pair<Sentence, Sentence>
+	private fun analyze(sentence: Sentence): Pair<Sentence, Sentence> =
+		if (sentence.size > 2 && sentence[1].match(Token(Sign, ":>"))) {
+			sentence.take(1) to sentence.drop(2)
+		} else {
+			emptySentence to sentence
+		}
 
 	/** 添加规则和动作 */
 	operator fun set(example: String, action: Action) {
 		example.erase()
 			//检查 规则有效 且 不存在相同规则
 			.takeIf { sentence ->
-				sentence.isNotEmpty() && (library match sentence).values.none { it.success }
-			}?.let { library[it] = action }
+				sentence.isNotEmpty() && (userLibrary match sentence).values.none { it.success }
+			}?.let { userLibrary[it] = action }
 			?: throw RuntimeException("rule \"$example\" already exist")
 	}
 
@@ -28,21 +49,26 @@ class Parser {
 		val sentence = command.cleanup()
 		if (sentence.isEmpty()) return
 		//指令分析
-		//val (inner, user) = analyze(command)
-		val inner = listOf<Token<*>>()
-		val user = sentence
+		val (inner, user) = analyze(sentence)
 		//用户指令匹配
-		val matchers = library match user
+		val matchers = userLibrary match user
 		//内部指令有效
 		if (inner.isNotEmpty()) {
-
+			//解析 - 反馈
+			val (success, info) = coreLibrary
+				.filter { equal(inner.size, it.key.dim, it.key[inner]) }
+				.toList()
+				.firstOrNull()
+				?.second
+				?.invoke(user, matchers)
+				?: cannotMatch
+			//显示
+			(if (success) System.out else System.err).println(info)
 		}
 		//内部指令无效
 		else {
-			//解析
-			val result = parse(user, matchers)
-			//反馈
-			val (success, info) = feedback(user, result)
+			//解析 - 反馈
+			val (success, info) = feedback(user, parse(user, matchers))
 			//显示
 			(if (success) System.out else System.err).println(info)
 		}
@@ -66,6 +92,11 @@ class Parser {
 
 		//规则集空
 		val noRule = Result(Error, "no rule")
+
+		//无法匹配
+		val cannotMatch = false to "can't match any rule"
+
+		val emptySentence = listOf<Token<*>>()
 
 		//判断多个元素相等
 		@JvmStatic

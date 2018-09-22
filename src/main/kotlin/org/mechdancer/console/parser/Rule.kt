@@ -1,5 +1,7 @@
 package org.mechdancer.console.parser
 
+import kotlin.math.min
+
 typealias Sentence = List<Token<*>>
 typealias Action = Sentence.() -> Pair<Boolean, Any?>
 typealias Rule = Sentence
@@ -17,9 +19,10 @@ val Rule.dim get() = size
  * @return 匹配长度
  */
 operator fun Rule.get(sentence: Sentence): Int {
-	for (i in sentence.indices)
+	val length = min(lastIndex, sentence.lastIndex)
+	for (i in 0..length)
 		if (this[i] notMatch sentence[i]) return i
-	return sentence.size
+	return length + 1
 }
 
 /**
