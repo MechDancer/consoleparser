@@ -10,15 +10,14 @@ class Parser {
 	//用户指令集
 	private val userLibrary = mutableMapOf<Rule, Action>()
 	//内部指令集
-	private val coreLibrary = mapOf<Rule, (Sentence, Map<Rule, Matcher>) -> Pair<Boolean, Any>>(
+	private val coreLibrary = mapOf<Rule, CoreAction>(
 		"help".erase() to { sentence, matchers ->
 			val maybe = matchers.filter { it.value.length == sentence.size }
-			if (maybe.isEmpty())
-				cannotMatch
-			else
-				true to StringBuilder().apply {
-					maybe.keys.forEach { appendln(it.ruleView()) }
-				}
+			if (maybe.isEmpty()) cannotMatch
+			else true to StringBuilder().apply {
+				maybe.keys.forEach { appendln(it.ruleView()) }
+				deleteCharAt(lastIndex)
+			}
 		},
 		"do".erase() to { sentence, matchers ->
 			feedback(sentence, parse(sentence, matchers))
@@ -52,39 +51,22 @@ class Parser {
 		val (inner, user) = analyze(sentence)
 		//用户指令匹配
 		val matchers = userLibrary match user
-		//内部指令有效
-		if (inner.isNotEmpty()) {
-			//解析 - 反馈
-			val (success, info) = coreLibrary
-				.filter { equal(inner.size, it.key.dim, it.key[inner]) }
-				.toList()
-				.firstOrNull()
-				?.second
-				?.invoke(user, matchers)
-				?: cannotMatch
-			//显示
-			(if (success) System.out else System.err).println(info)
-		}
-		//内部指令无效
-		else {
-			//解析 - 反馈
-			val (success, info) = feedback(user, parse(user, matchers))
-			//显示
-			(if (success) System.out else System.err).println(info)
-		}
+		//解析 - 反馈
+		val (success, info) =
+			if (inner.isNotEmpty())
+			//内部指令有效
+				coreLibrary
+					.filter { equal(inner.size, it.key.dim, it.key[inner]) }
+					.toList()
+					.firstOrNull()
+					?.second
+					?.invoke(user, matchers)
+					?: cannotMatch
+			//内部指令无效
+			else feedback(user, parse(user, matchers))
+		//显示
+		(if (success) System.out else System.err).println(info)
 	}
-
-	/**
-	 * 匹配结果
-	 * @param length  匹配长度
-	 * @param success 是否匹配成功
-	 * @param action  对应操作
-	 */
-	private data class Matcher(
-		val length: Int,
-		val success: Boolean,
-		val action: Action
-	)
 
 	private companion object {
 		//指令不完整

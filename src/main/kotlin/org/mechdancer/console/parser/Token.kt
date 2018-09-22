@@ -6,10 +6,14 @@ import org.mechdancer.console.parser.TokenType.Number
 /**
  * 一个词定义为其类别与含义
  * 当只需判断类别时含义记为空
+ * @param type 词性
+ * @param data 词义
  */
 data class Token<T>(val type: TokenType, val data: T? = null) {
+	/** 转字符 */
 	val text get() = (data as? String) ?: data?.toString()
 
+	/** 按类型显示 */
 	override fun toString() =
 		text ?: when (type) {
 			Integer -> "[int]"
@@ -28,8 +32,8 @@ data class Token<T>(val type: TokenType, val data: T? = null) {
 			Number  -> actual.type == Integer || actual.type == Number
 			Sign    -> actual.type == Sign && (null == text || actual.text == text)
 			Word    -> actual.type == Word && (null == text || actual.text == text)
-			Final   -> actual.type == Final
-			Note    -> throw IllegalArgumentException("note appear in a example")
+			Final   -> throw IllegalArgumentException("final appear in an example")
+			Note    -> throw IllegalArgumentException("note appear in an example")
 			Key     -> true
 		}
 

@@ -19,11 +19,11 @@ val Sentence.numbers
 			}
 		}
 
-/** 取出句子中所有数字 */
+/** 取出句子中所有符号 */
 val Sentence.signs
 	get() = filter { it.type == Sign }.map { it.data as String }
 
-/** 取出句子中所有数字 */
+/** 取出句子中所有单词 */
 val Sentence.words
 	get() = filter { it.type == Word }.map { it.data as String }
 
