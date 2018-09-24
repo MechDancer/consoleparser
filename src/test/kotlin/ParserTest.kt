@@ -13,5 +13,6 @@ fun main(args: Array<String>) {
 		this["print {word}"] = { true to words.first() }
 		this["print {int}"] = { true to integers.first() }
 	}
+
 	while (true) readLine()?.let(parser::invoke)
 }

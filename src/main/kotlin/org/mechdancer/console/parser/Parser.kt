@@ -44,29 +44,34 @@ class Parser {
 	}
 
 	/** 解析并执行指令 */
-	operator fun invoke(command: String) {
-		//分词
-		val sentence = command.cleanup()
-		if (sentence.isEmpty()) return
-		//指令分析
-		val (inner, user) = analyze(sentence)
-		//用户指令匹配
-		val matchers = userLibrary match user
-		//解析 - 反馈
-		val (success, info) =
-			if (inner.isNotEmpty())
-			//内部指令有效
-				coreLibrary
-					.filter { equal(inner.size, it.key.dim, it.key[inner]) }
-					.toList()
-					.firstOrNull()
-					?.second
-					?.invoke(user, matchers)
-					?: cannotMatch
-			//内部指令无效
-			else feedback(user, parse(user, matchers))
-		//显示
-		(if (success) System.out else System.err).println(info)
+	operator fun invoke(script: String) {
+		script
+			.reader()
+			.readLines()
+			.forEach { command ->
+				//分词
+				val sentence = command.cleanup()
+				if (sentence.isEmpty()) return
+				//指令分析
+				val (inner, user) = analyze(sentence)
+				//用户指令匹配
+				val matchers = userLibrary match user
+				//解析 - 反馈
+				val (success, info) =
+					if (inner.isNotEmpty())
+					//内部指令有效
+						coreLibrary
+							.filter { equal(inner.size, it.key.dim, it.key[inner]) }
+							.toList()
+							.firstOrNull()
+							?.second
+							?.invoke(user, matchers)
+							?: cannotMatch
+					//内部指令无效
+					else feedback(user, parse(user, matchers))
+				//显示
+				(if (success) System.out else System.err).println(info)
+			}
 	}
 
 	private companion object {
