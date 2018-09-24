@@ -1,7 +1,7 @@
 package org.mechdancer.console.parser
 
 import org.mechdancer.console.parser.Result.State.*
-import org.mechdancer.console.parser.TokenType.Sign
+import org.mechdancer.console.parser.TokenType.Word
 
 /**
  * 语义分析和执行器
@@ -11,26 +11,27 @@ class Parser {
 	private val userLibrary = mutableMapOf<Rule, Action>()
 	//内部指令集
 	private val coreLibrary = mapOf<Rule, CoreAction>(
-		"help".erase() to { sentence, matchers ->
-			val maybe = matchers.filter { it.value.length == sentence.size }
-			if (maybe.isEmpty()) cannotMatch
-			else true to StringBuilder().apply {
-				maybe.keys.forEach { appendln(it.ruleView()) }
+		listOf(Token(Word, ":help")) to { sentence, matchers ->
+			true to buildString {
+				(matchers
+					.filter { it.value.length == sentence.size }
+					.takeIf { it.isNotEmpty() } ?: userLibrary)
+					.keys
+					.forEach { appendln(it.ruleView()) }
 				deleteCharAt(lastIndex)
 			}
 		},
-		"do".erase() to { sentence, matchers ->
+		listOf(Token(Word, ":do")) to { sentence, matchers ->
 			feedback(sentence, parse(sentence, matchers))
 		}
 	)
 
 	/** 指令分析 */
-	private fun analyze(sentence: Sentence): Pair<Sentence, Sentence> =
-		if (sentence.size > 2 && sentence[1].match(Token(Sign, ":>"))) {
-			sentence.take(1) to sentence.drop(2)
-		} else {
+	private fun analyze(sentence: Sentence) =
+		if (sentence.firstOrNull()?.text?.startsWith(':') == true)
+			sentence.take(1) to sentence.drop(1)
+		else
 			emptySentence to sentence
-		}
 
 	/** 添加规则和动作 */
 	operator fun set(example: String, action: Action) {
@@ -101,15 +102,6 @@ class Parser {
 			}
 		}
 
-		//添加提示信息
-		@JvmStatic
-		fun StringBuilder.appendTip(result: Result) {
-			if (result.info.isNotBlank()) {
-				appendln()
-				append(result.info)
-			}
-		}
-
 		//解析指令
 		@JvmStatic
 		fun parse(
@@ -137,7 +129,7 @@ class Parser {
 		@JvmStatic
 		fun feedback(sentence: Sentence, result: Result) =
 			if (result.positive) true to result.info
-			else false to StringBuilder().apply {
+			else false to buildString {
 				when (result.what) {
 					Success    -> Unit
 					Failure    -> append(result.info)
@@ -147,16 +139,18 @@ class Parser {
 							.forEachIndexed { i, text ->
 								append(if (i == result.where) "> $text < " else "$text ")
 							}
-						appendTip(result)
+						if (result.info.isNotBlank())
+							append("\n${result.info}")
 					}
 					Incomplete -> {
 						append("incomplete command: ")
 						sentence.forEach { append("${it.text} ") }
 						append("...")
-						appendTip(result)
+						if (result.info.isNotBlank())
+							append("\n${result.info}")
 					}
 				}
-			}.toString()
+			}
 
 		//匹配
 		@JvmStatic

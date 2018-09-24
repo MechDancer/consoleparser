@@ -45,11 +45,12 @@ operator fun Rule.get(sentence: Sentence): Int {
  * 以规则形式展示
  */
 fun Rule.ruleView() =
-	StringBuilder("\"").apply {
+	buildString {
+		append("\"")
 		this@ruleView.forEach { append("$it ") }
 		deleteCharAt(lastIndex)
 		append("\"")
-	}.toString()
+	}
 
 /**
  * 小工具
