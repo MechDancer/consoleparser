@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    kotlin("jvm") version "1.3-M2"
+    kotlin("jvm") version "1.3.0-rc-57"
 }
 
 group = "org.mechdancer"
