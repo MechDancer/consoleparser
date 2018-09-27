@@ -31,3 +31,7 @@ val Sentence.words
 val Sentence.keys
 	get() = filter { it.type == Key }.map { it.data }
 
+/** 构造解析器 */
+fun buildParser(block: Parser.() -> Unit) =
+	Parser().apply(block)
+
