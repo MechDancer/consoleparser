@@ -10,7 +10,7 @@ fun main(args: Array<String>) {
 		this["hello computer"] = { true to "hello commander" }
 		this["hi"] = { true to "hi" }
 		this["{num} + {num}"] = { true to numbers.sum() }
-		this["print {word}"] = { true to words.first() }
+		this["print {word}"] = { true to words[1] }
 		this["print {int}"] = { true to integers.first() }
 	}
 
