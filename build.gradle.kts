@@ -1,14 +1,23 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-plugins {
-    kotlin("jvm") version "1.3.0-rc-57"
+
+buildscript {
+    dependencies {
+        classpath("com.novoda:bintray-release:0.8.1")
+    }
 }
 
+plugins {
+    kotlin("jvm") version "1.2.71"
+}
+
+apply {
+    plugin("com.novoda.bintray-release")
+}
 group = "org.mechdancer"
-version = "1.0-SNAPSHOT"
+version = "0.1.0-SNAPSHOT"
 
 repositories {
-    maven { setUrl("http://dl.bintray.com/kotlin/kotlin-eap") }
     mavenCentral()
 }
 
@@ -22,4 +31,13 @@ configure<JavaPluginConvention> {
 }
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+configure<PublishExtension> {
+    userOrg = 'mechdancer'
+    groupId = 'org.mechdancer'
+    artifactId = 'consoleparser'
+    publishVersion = '0.1.0'
+    desc = 'cli parser'
+    website = 'https://github.com/MechDancer/consoleparser'
 }
