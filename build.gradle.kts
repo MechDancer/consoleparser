@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "org.mechdancer"
-version = "1.0-SNAPSHOT"
+version = "0.1.5-SNAPSHOT"
 
 repositories {
 	mavenCentral()
