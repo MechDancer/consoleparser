@@ -3,7 +3,8 @@ import org.junit.Test
 import org.mechdancer.console.parser.Token
 import org.mechdancer.console.parser.TokenType.*
 import org.mechdancer.console.parser.TokenType.Number
-import org.mechdancer.console.s4.StringSplitter
+import org.mechdancer.console.s4.defaultSet
+import org.mechdancer.console.s4.splitBy
 
 class TestS4 {
 	@Test
@@ -23,6 +24,6 @@ class TestS4 {
 			Token(Integer, 255),
 			Token(Word, "hello world"),
 			Token(Note, "this is a note")
-		), StringSplitter.default(source))
+		), source splitBy defaultSet)
 	}
 }
