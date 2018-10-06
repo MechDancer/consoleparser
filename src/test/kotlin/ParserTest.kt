@@ -1,10 +1,11 @@
-import org.mechdancer.console.parser.Parser
+import org.mechdancer.console.parser.buildParser
 import org.mechdancer.console.parser.integers
 import org.mechdancer.console.parser.numbers
 import org.mechdancer.console.parser.words
 
 fun main(args: Array<String>) {
-	val parser = Parser().apply {
+	var flag = true
+	val parser = buildParser {
 		this["hello"] = { true to "hello" }
 		this["hello world"] = { true to "hello master" }
 		this["hello computer"] = { true to "hello commander" }
@@ -12,7 +13,11 @@ fun main(args: Array<String>) {
 		this["(* num *) + (* num *)"] = { true to numbers.sum() }
 		this["print (* word *)"] = { true to words[1] }
 		this["print (* int *)"] = { true to integers.first() }
+		this["quit"] = {
+			flag = false
+			true to "bye~"
+		}
 	}
 
-	while (true) readLine()?.let(parser::invoke)
+	while (flag) readLine()?.let(parser::invoke)
 }
