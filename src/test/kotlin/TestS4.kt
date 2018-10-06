@@ -22,8 +22,7 @@ class TestS4 {
 			Token(Sign, "+-"),
 			Token(Integer, 67890),
 			Token(Integer, 255),
-			Token(Word, "hello world"),
-			Token(Note, "this is a note")
+			Token(Word, "hello world")
 		), source splitBy defaultSet)
 	}
 }
