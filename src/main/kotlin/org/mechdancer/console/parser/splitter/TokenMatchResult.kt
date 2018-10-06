@@ -1,8 +1,8 @@
-package org.mechdancer.console.s4
+package org.mechdancer.console.parser.splitter
 
-import org.mechdancer.console.s4.Matcher.*
+import org.mechdancer.console.parser.splitter.TokenMatchResult.*
 
-enum class Matcher {
+enum class TokenMatchResult {
 	Accepted, Rejected, RejectNext;
 
 	operator fun component1(): Boolean =

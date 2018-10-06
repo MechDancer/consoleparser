@@ -1,9 +1,9 @@
-package org.mechdancer.console.s4
+package org.mechdancer.console.parser.splitter
 
 /**
- * 累积分析器
+ * 累积扫描器
  */
-abstract class TokenBuffer<T, R> {
+abstract class TokenScanner<T, R> {
 	//单元缓存
 	protected val buffer = mutableListOf<T>()
 
@@ -29,7 +29,7 @@ abstract class TokenBuffer<T, R> {
 	/**
 	 * 判断能否匹配
 	 */
-	abstract fun check(char: T): Matcher
+	abstract fun check(char: T): TokenMatchResult
 
 	/**
 	 * 尝试匹配一个单字

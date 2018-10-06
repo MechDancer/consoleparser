@@ -1,12 +1,11 @@
-package org.mechdancer.console.s4
+package org.mechdancer.console.parser.splitter
 
 import org.mechdancer.console.parser.Token
 import org.mechdancer.console.parser.TokenType.Word
 
-class WordBuffer : CharBuffer() {
+class WordScanner : CharScanner() {
 	override fun check(char: Char) =
 		depends(char.isJavaIdentifierStart() || buffer.isNotEmpty() && char.isJavaIdentifierPart())
 
-	override fun build() =
-		text?.let { Token(Word, it) }
+	override fun build() = text?.let { Token(Word, it) }
 }

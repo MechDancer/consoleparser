@@ -1,9 +1,9 @@
-package org.mechdancer.console.s4
+package org.mechdancer.console.parser.splitter
 
 import org.mechdancer.console.parser.Sentence
 import org.mechdancer.console.parser.Token
 
-infix fun String.splitBy(buffers: Set<CharBuffer>): Sentence {
+infix fun String.splitBy(buffers: Set<CharScanner>): Sentence {
 	val sentence = mutableListOf<Token<*>>()
 	fun summary(char: Char? = null) {
 		buffers
@@ -21,10 +21,11 @@ infix fun String.splitBy(buffers: Set<CharBuffer>): Sentence {
 }
 
 val defaultSet = setOf(
-	NumberBuffer(),
-	WordBuffer(),
-	StringBuffer(),
-	SignBuffer(),
-	KeyBuffer(),
-	NoteBuffer()
+	NumberScanner(),
+	WordScanner(),
+	StringScanner(),
+	SignScanner(),
+	KeyScanner(),
+	NoteScanner(),
+	SplitterScanner()
 )

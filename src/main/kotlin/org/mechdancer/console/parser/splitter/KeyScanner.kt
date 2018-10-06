@@ -1,12 +1,17 @@
-package org.mechdancer.console.s4
+package org.mechdancer.console.parser.splitter
 
 import org.mechdancer.console.parser.Token
 import org.mechdancer.console.parser.TokenType.*
 import org.mechdancer.console.parser.TokenType.Number
-import org.mechdancer.console.s4.Matcher.Accepted
-import org.mechdancer.console.s4.Matcher.Rejected
+import org.mechdancer.console.parser.splitter.TokenMatchResult.Accepted
+import org.mechdancer.console.parser.splitter.TokenMatchResult.Rejected
 
-class KeyBuffer : CharBuffer() {
+/**
+ * 关键字扫描
+ * 语法：(*expresion*)
+ */
+class KeyScanner : CharScanner() {
+	//关键内容
 	private val key
 		get() =
 			text?.takeIf { it.endsWith("*)") }
@@ -14,6 +19,7 @@ class KeyBuffer : CharBuffer() {
 				?.trim()
 
 	override fun check(char: Char) =
+	//开始于(*，结束于*)，不能包含换行
 		when (buffer.size) {
 			0    -> depends(char == '(')
 			1    -> depends(char == '*')
@@ -26,6 +32,7 @@ class KeyBuffer : CharBuffer() {
 		}
 
 	override fun build() =
+	//翻译类别关键字
 		when (key?.toLowerCase()) {
 			null   -> null
 			"int"  -> Token<Unit>(Integer)

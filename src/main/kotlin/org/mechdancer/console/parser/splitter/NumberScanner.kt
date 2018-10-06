@@ -1,10 +1,13 @@
-package org.mechdancer.console.s4
+package org.mechdancer.console.parser.splitter
 
 import org.mechdancer.console.parser.Token
 import org.mechdancer.console.parser.TokenType.Integer
 import org.mechdancer.console.parser.TokenType.Number
 
-class NumberBuffer : CharBuffer() {
+/**
+ * 数字扫描
+ */
+class NumberScanner : CharScanner() {
 	override fun build() =
 		if ('.' in buffer)
 			text?.toDoubleOrNull()?.let { Token(Number, it) }
@@ -15,15 +18,15 @@ class NumberBuffer : CharBuffer() {
 				else -> text?.toIntOrNull(10)
 			}?.let { Token(Integer, it) }
 
-	override fun check(char: Char): Matcher {
+	override fun check(char: Char): TokenMatchResult {
 		val case = char.toLowerCase()
+		val mode = buffer == listOf('0') && case in modeSet
 		val modeChar by lazy { buffer.getOrNull(1) }
-		val mode by lazy { buffer == listOf('0') && case in modeSet }
 		val bin by lazy { modeChar == 'b' && case in binSet }
 		val int by lazy { modeChar != 'b' && case in intSet }
 		val hex by lazy { modeChar == 'x' && case in hexSet }
 		val decimal by lazy { modeChar !in modeSet && '.' !in buffer && case == '.' }
-		return depends(mode || bin || hex || int || decimal)
+		return depends(mode || int || bin || hex || decimal)
 	}
 
 	private companion object {

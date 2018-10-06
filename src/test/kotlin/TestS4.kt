@@ -3,8 +3,8 @@ import org.junit.Test
 import org.mechdancer.console.parser.Token
 import org.mechdancer.console.parser.TokenType.*
 import org.mechdancer.console.parser.TokenType.Number
-import org.mechdancer.console.s4.defaultSet
-import org.mechdancer.console.s4.splitBy
+import org.mechdancer.console.parser.splitter.defaultSet
+import org.mechdancer.console.parser.splitter.splitBy
 
 class TestS4 {
 	@Test
