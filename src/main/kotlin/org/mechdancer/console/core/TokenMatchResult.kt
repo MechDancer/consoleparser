@@ -1,6 +1,6 @@
-package org.mechdancer.console.parser.splitter
+package org.mechdancer.console.core
 
-import org.mechdancer.console.parser.splitter.TokenMatchResult.*
+import org.mechdancer.console.core.TokenMatchResult.*
 
 enum class TokenMatchResult {
 	Accepted, Rejected, RejectNext;

@@ -1,4 +1,4 @@
-package org.mechdancer.console.parser.splitter
+package org.mechdancer.console.core
 
 /**
  * 累积扫描器

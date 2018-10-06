@@ -1,8 +1,9 @@
-package org.mechdancer.console.parser.splitter
+package org.mechdancer.console.scanner
 
-import org.mechdancer.console.parser.Token
-import org.mechdancer.console.parser.TokenType.Word
-import org.mechdancer.console.parser.splitter.TokenMatchResult.Rejected
+import org.mechdancer.console.core.Token
+import org.mechdancer.console.core.TokenMatchResult.Rejected
+import org.mechdancer.console.core.TokenType.Word
+import org.mechdancer.console.core.depends
 
 class StringScanner : CharScanner() {
 	override fun check(char: Char) =

@@ -1,5 +1,6 @@
 package org.mechdancer.console.parser
 
+import org.mechdancer.console.core.Token
 import kotlin.math.min
 
 /** 句子是词的列表 */

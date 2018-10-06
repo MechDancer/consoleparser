@@ -1,7 +1,8 @@
-package org.mechdancer.console.parser.splitter
+package org.mechdancer.console.scanner
 
-import org.mechdancer.console.parser.Token
-import org.mechdancer.console.parser.TokenType.Sign
+import org.mechdancer.console.core.Token
+import org.mechdancer.console.core.TokenType.Sign
+import org.mechdancer.console.core.depends
 
 /**
  * 符号扫描

@@ -1,11 +1,10 @@
 package org.mechdancer.console.parser
 
+import org.mechdancer.console.core.Token
 import org.mechdancer.console.parser.Result.State.*
-import org.mechdancer.console.parser.TokenType.Sign
-import org.mechdancer.console.parser.TokenType.Word
-import org.mechdancer.console.parser.splitter.defaultSet
-import org.mechdancer.console.parser.splitter.eraseBy
-import org.mechdancer.console.parser.splitter.splitBy
+import org.mechdancer.console.scanner.defaultSet
+import org.mechdancer.console.scanner.eraseBy
+import org.mechdancer.console.scanner.splitBy
 
 /**
  * 语义分析和执行器

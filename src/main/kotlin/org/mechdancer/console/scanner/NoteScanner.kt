@@ -1,9 +1,11 @@
-package org.mechdancer.console.parser.splitter
+package org.mechdancer.console.scanner
 
-import org.mechdancer.console.parser.Token
-import org.mechdancer.console.parser.TokenType.Note
-import org.mechdancer.console.parser.splitter.TokenMatchResult.Accepted
-import org.mechdancer.console.parser.splitter.TokenMatchResult.Rejected
+import org.mechdancer.console.core.Token
+import org.mechdancer.console.core.TokenMatchResult.Accepted
+import org.mechdancer.console.core.TokenMatchResult.Rejected
+import org.mechdancer.console.core.TokenType.Note
+import org.mechdancer.console.core.depends
+import org.mechdancer.console.core.nextDepends
 
 /**
  * 注释扫描

@@ -1,8 +1,10 @@
-package org.mechdancer.console.parser.splitter
+package org.mechdancer.console.scanner
 
-import org.mechdancer.console.parser.Token
-import org.mechdancer.console.parser.TokenType.Integer
-import org.mechdancer.console.parser.TokenType.Number
+import org.mechdancer.console.core.Token
+import org.mechdancer.console.core.TokenMatchResult
+import org.mechdancer.console.core.TokenType.Integer
+import org.mechdancer.console.core.TokenType.Number
+import org.mechdancer.console.core.depends
 
 /**
  * 数字扫描

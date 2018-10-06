@@ -1,4 +1,4 @@
-package org.mechdancer.console.parser
+package org.mechdancer.console.core
 
 /**
  * 标签类别

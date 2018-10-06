@@ -1,35 +1,35 @@
-package org.mechdancer.console.parser.splitter
+package org.mechdancer.console.scanner
 
+import org.mechdancer.console.core.Token
 import org.mechdancer.console.parser.Sentence
-import org.mechdancer.console.parser.Token
 
-private fun split(
+private fun scan(
 	string: String,
-	buffers: Set<CharScanner>,
+	scanners: Set<CharScanner>,
 	erase: Boolean
 ): Sentence {
 	val sentence = mutableListOf<Token<*>>()
 	fun summary(char: Char?) {
-		buffers
+		scanners
 			.maxBy { it.size }
 			?.takeIf { it !is NoteScanner }
 			?.build(erase)
 			?.let { sentence.add(it) }
-		buffers.forEach { it.reset(char) }
+		scanners.forEach { it.reset(char) }
 	}
 
 	for (char in string.trim())
-		if (buffers.map { it.offer(char) }.none { it })
+		if (scanners.map { it.offer(char) }.none { it })
 			summary(char)
 	summary(null)
 	return sentence
 }
 
-infix fun String.splitBy(buffers: Set<CharScanner>) =
-	split(this, buffers, false)
+infix fun String.splitBy(scanners: Set<CharScanner>) =
+	scan(this, scanners, false)
 
-infix fun String.eraseBy(buffers: Set<CharScanner>) =
-	split(this, buffers, true)
+infix fun String.eraseBy(scanners: Set<CharScanner>) =
+	scan(this, scanners, true)
 
 val defaultSet = setOf(
 	NumberScanner(),

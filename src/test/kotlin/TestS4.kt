@@ -1,10 +1,10 @@
 import org.junit.Assert
 import org.junit.Test
-import org.mechdancer.console.parser.Token
-import org.mechdancer.console.parser.TokenType.*
-import org.mechdancer.console.parser.TokenType.Number
-import org.mechdancer.console.parser.splitter.defaultSet
-import org.mechdancer.console.parser.splitter.splitBy
+import org.mechdancer.console.core.Token
+import org.mechdancer.console.core.TokenType.*
+import org.mechdancer.console.core.TokenType.Number
+import org.mechdancer.console.scanner.defaultSet
+import org.mechdancer.console.scanner.splitBy
 
 class TestS4 {
 	@Test
