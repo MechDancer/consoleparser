@@ -20,7 +20,6 @@ data class Token<T>(val type: TokenType, val data: T? = null) {
 			Number  -> "[num]"
 			Sign    -> "[sign]"
 			Word    -> "[word]"
-			Final   -> ";"
 			Note    -> ""
 			Key     -> "[key]"
 		}
@@ -32,7 +31,6 @@ data class Token<T>(val type: TokenType, val data: T? = null) {
 			Number  -> actual.type == Integer || actual.type == Number
 			Sign    -> actual.type == Sign && (null == text || actual.text == text)
 			Word    -> actual.type == Word && (null == text || actual.text == text)
-			Final   -> throw IllegalArgumentException("final appear in an example")
 			Note    -> throw IllegalArgumentException("note appear in an example")
 			Key     -> true
 		}

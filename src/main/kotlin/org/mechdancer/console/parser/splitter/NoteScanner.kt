@@ -23,8 +23,9 @@ class NoteScanner : CharScanner() {
 			}
 		}
 
-	override fun build() =
-		text?.let { it.substring(2, if (it.endsWith("-)")) it.length - 2 else it.length) }
+	override fun build(erase:Boolean) =
+		text?.takeUnless { erase }
+			?.let { it.substring(2, if (it.endsWith("-)")) it.length - 2 else it.length) }
 			?.trim()
 			?.let { Token(Note, it) }
 }

@@ -1,7 +1,11 @@
 package org.mechdancer.console.parser
 
 import org.mechdancer.console.parser.Result.State.*
+import org.mechdancer.console.parser.TokenType.Sign
 import org.mechdancer.console.parser.TokenType.Word
+import org.mechdancer.console.parser.splitter.defaultSet
+import org.mechdancer.console.parser.splitter.eraseBy
+import org.mechdancer.console.parser.splitter.splitBy
 
 /**
  * 语义分析和执行器
@@ -11,7 +15,7 @@ class Parser {
 	private val userLibrary = mutableMapOf<Rule, Action>()
 	//内部指令集
 	private val coreLibrary = mapOf<Rule, CoreAction>(
-		listOf(Token(Word, ":help")) to { sentence, matchers ->
+		":help".splitBy(defaultSet) to { sentence, matchers ->
 			true to buildString {
 				(matchers
 					.filter { it.value.length == sentence.size }
@@ -21,21 +25,21 @@ class Parser {
 				deleteCharAt(lastIndex)
 			}
 		},
-		listOf(Token(Word, ":do")) to { sentence, matchers ->
+		":do".splitBy(defaultSet) to { sentence, matchers ->
 			feedback(sentence, parse(sentence, matchers))
 		}
 	)
 
 	/** 指令分析 */
 	private fun analyze(sentence: Sentence) =
-		if (sentence.firstOrNull()?.text?.startsWith(':') == true)
-			sentence.take(1) to sentence.drop(1)
+		if (sentence.firstOrNull()?.text == ":")
+			sentence.take(2) to sentence.drop(2)
 		else
 			emptySentence to sentence
 
 	/** 添加规则和动作 */
 	operator fun set(example: String, action: Action) {
-		example.erase()
+		example.eraseBy(defaultSet)
 			//检查 规则有效 且 不存在相同规则
 			.takeIf { sentence ->
 				sentence.isNotEmpty() && (userLibrary match sentence).values.none { it.success }
@@ -50,7 +54,7 @@ class Parser {
 			.readLines()
 			.forEach { command ->
 				//分词
-				val sentence = command.cleanup()
+				val sentence = command.splitBy(defaultSet)
 				if (sentence.isEmpty()) return
 				//指令分析
 				val (inner, user) = analyze(sentence)

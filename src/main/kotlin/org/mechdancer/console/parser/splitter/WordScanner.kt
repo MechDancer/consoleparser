@@ -7,5 +7,6 @@ class WordScanner : CharScanner() {
 	override fun check(char: Char) =
 		depends(char.isJavaIdentifierStart() || buffer.isNotEmpty() && char.isJavaIdentifierPart())
 
-	override fun build() = text?.let { Token(Word, it) }
+	override fun build(erase: Boolean) =
+		text?.let { Token(Word, it) }
 }

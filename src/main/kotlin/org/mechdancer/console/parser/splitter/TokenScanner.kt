@@ -46,5 +46,5 @@ abstract class TokenScanner<T, R> {
 	/**
 	 * 构造标签
 	 */
-	abstract fun build(): R?
+	abstract fun build(erase: Boolean = false): R?
 }

@@ -14,7 +14,7 @@ val Sentence.numbers
 			when (it.type) {
 				Integer -> (it.data as Int).toDouble()
 				Number  -> it.data as Double
-				Sign, Word, Final, Note, Key
+				Sign, Word, Note, Key
 				        -> null
 			}
 		}

@@ -8,6 +8,6 @@ import org.mechdancer.console.parser.TokenType.Sign
  */
 class SplitterScanner : CharScanner() {
 	override fun check(char: Char) = depends(buffer.isEmpty() && char in signSet)
-	override fun build() = text?.let { Token(Sign, it) }
+	override fun build(erase: Boolean) = text?.let { Token(Sign, it) }
 	val signSet = setOf('`', '(', ')', '[', '{', '}', ']', '\\', ';', ',')
 }

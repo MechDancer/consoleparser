@@ -31,7 +31,7 @@ class KeyScanner : CharScanner() {
 			}
 		}
 
-	override fun build() =
+	override fun build(erase: Boolean) =
 	//翻译类别关键字
 		when (key?.toLowerCase()) {
 			null   -> null

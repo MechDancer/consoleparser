@@ -9,7 +9,7 @@ import org.mechdancer.console.parser.TokenType.Sign
  */
 class SignScanner : CharScanner() {
 	override fun check(char: Char) = depends(char in signSet)
-	override fun build() = text?.let { Token(Sign, it) }
+	override fun build(erase: Boolean) = text?.let { Token(Sign, it) }
 
 	private companion object {
 		val signSet = setOf(
