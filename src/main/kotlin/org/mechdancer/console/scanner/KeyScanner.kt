@@ -1,46 +1,66 @@
 package org.mechdancer.console.scanner
 
 import org.mechdancer.console.core.Token
-import org.mechdancer.console.core.TokenMatchResult.Accepted
-import org.mechdancer.console.core.TokenMatchResult.Rejected
 import org.mechdancer.console.core.TokenType.*
 import org.mechdancer.console.core.TokenType.Number
-import org.mechdancer.console.core.depends
-import org.mechdancer.console.core.nextDepends
 
 /**
  * 关键字扫描
  * 语法：(*expresion*)
  */
-class KeyScanner : CharScanner() {
-	//关键内容
-	private val key
-		get() =
-			text?.takeIf { it.endsWith("*)") }
-				?.let { it.substring(2, it.length - 2) }
-				?.trim()
+class KeyScanner : CharScanner {
+	override var remain = 1
+		private set
 
-	override fun check(char: Char) =
-	//开始于(*，结束于*)，不能包含换行
-		when (buffer.size) {
-			0    -> depends(char == '(')
-			1    -> depends(char == '*')
-			2, 3 -> depends(char != '\n')
-			else -> when (char) {
-				'\n' -> Rejected
-				')'  -> nextDepends(buffer.last() != '*')
-				else -> Accepted
+	private val buffer = StringBuilder()
+
+	override fun offer(e: Char) {
+		if (remain-- < 0) return
+		remain = when {
+			buffer.isEmpty()       -> when (e) {
+				'@'  -> +1
+				else -> -1
 			}
-		}
+			buffer.length == 1     -> when {
+				e == '{'                  -> +1
+				e.isJavaIdentifierStart() -> +0
+				else                      -> -1
+			}
+			buffer.take(2) == "@{" ->
+				if (buffer.last() == '}') -1
+				else when (e) {
+					'}'  -> 0
+					else -> 1
+				}
+			else                   -> when {
+				e.isJavaIdentifierPart() -> +0
+				else                     -> -1
+			}
+		}.also { if (it >= 0) buffer.append(e) }
+	}
 
-	override fun build(erase: Boolean) =
-	//翻译类别关键字
-		when (key?.toLowerCase()) {
-			null   -> null
-			"int"  -> Token<Unit>(Integer)
-			"num"  -> Token(Number)
-			"word" -> Token(Word)
-			"sign" -> Token(Sign)
-			else   -> Token(Key)
-		}
+	override fun reset(e: Char?) {
+		remain = 1
+		buffer.setLength(0)
+		e?.let(::offer)
+	}
+
+	override fun build() =
+		buffer
+			.takeIf { remain <= 0 && buffer.isNotBlank() }
+			?.run {
+				if (take(2) != "@{") drop(1)
+				else dropLast(1).drop(2)
+			}
+			?.toString()
+			?.let { key ->
+				when (key.toLowerCase()) {
+					"int"  -> Integer
+					"num"  -> Number
+					"sign" -> Sign
+					"word" -> Word
+					else   -> Key
+				}
+			}
+			?.let { Token<Unit>(it) }
 }

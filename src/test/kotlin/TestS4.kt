@@ -3,8 +3,8 @@ import org.junit.Test
 import org.mechdancer.console.core.Token
 import org.mechdancer.console.core.TokenType.*
 import org.mechdancer.console.core.TokenType.Number
-import org.mechdancer.console.scanner.defaultSet
-import org.mechdancer.console.scanner.splitBy
+import org.mechdancer.console.scanner.defaultScanners
+import org.mechdancer.console.scanner.scanBy
 
 class TestS4 {
 	@Test
@@ -23,6 +23,6 @@ class TestS4 {
 			Token(Integer, 67890),
 			Token(Integer, 255),
 			Token(Word, "hello world")
-		), source splitBy defaultSet)
+		), source scanBy defaultScanners)
 	}
 }

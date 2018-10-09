@@ -1,33 +1,54 @@
 package org.mechdancer.console.scanner
 
 import org.mechdancer.console.core.Token
-import org.mechdancer.console.core.TokenMatchResult.Accepted
-import org.mechdancer.console.core.TokenMatchResult.Rejected
 import org.mechdancer.console.core.TokenType.Note
-import org.mechdancer.console.core.depends
-import org.mechdancer.console.core.nextDepends
 
 /**
  * 注释扫描
- * 语法：(-expression-)
+ * 语法：/* expression */
  */
-class NoteScanner : CharScanner() {
-	override fun check(char: Char) =
-	//开始于(*，结束于*)，不能包含换行
-		when (buffer.size) {
-			0    -> depends(char == '(')
-			1    -> depends(char == '-')
-			2, 3 -> depends(char != '\n')
-			else -> when (char) {
-				'\n' -> Rejected
-				')'  -> nextDepends(buffer.last() != '-')
-				else -> Accepted
-			}
-		}
+class NoteScanner : CharScanner {
+	override var remain = 1
+		private set
 
-	override fun build(erase:Boolean) =
-		text?.takeUnless { erase }
-			?.let { it.substring(2, if (it.endsWith("-)")) it.length - 2 else it.length) }
-			?.trim()
+	private val buffer = StringBuilder()
+
+	override fun offer(e: Char) {
+		if (remain-- < 0) return
+		//开始于/*，结束于*/，不能包含换行
+		remain = when {
+			buffer.isEmpty()       -> when (e) {
+				'/'  -> 1
+				else -> -1
+			}
+			buffer.length == 1     -> when (e) {
+				'/'  -> 0
+				'*'  -> 2
+				else -> -1
+			}
+			buffer.take(2) == "/*" ->
+				if (buffer.takeLast(2) == "*/") -1
+				else when (e) {
+					'*'  -> 1
+					'/'  -> if (buffer.last() == '*') 0 else 2
+					else -> 2
+				}
+			else                   -> when (e) {
+				'\n' -> -1
+				else -> 0
+			}
+		}.also { if (it >= 0) buffer.append(e) }
+	}
+
+	override fun reset(e: Char?) {
+		remain = 1
+		buffer.setLength(0)
+		e?.let(::offer)
+	}
+
+	override fun build() =
+		buffer
+			.takeIf { remain <= 0 }
+			?.toString()
 			?.let { Token(Note, it) }
 }

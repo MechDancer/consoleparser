@@ -1,4 +1,4 @@
-package org.mechdancer.scanner
+package org.mechdancer.console.scanner
 
 /**
  * 标记扫描器
@@ -27,5 +27,5 @@ interface TokenScanner<T, R> {
 	 * 构造标签
 	 * @param erase 擦除具体内容以构造规则
 	 */
-	fun build(erase: Boolean = false): R?
+	fun build(): R?
 }

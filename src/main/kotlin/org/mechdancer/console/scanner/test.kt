@@ -1,4 +1,4 @@
-package org.mechdancer.scanner
+package org.mechdancer.console.scanner
 
 fun main(args: Array<String>) {
 	val scanner = SignScanner()

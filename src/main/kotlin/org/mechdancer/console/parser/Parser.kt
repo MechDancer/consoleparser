@@ -2,9 +2,8 @@ package org.mechdancer.console.parser
 
 import org.mechdancer.console.core.Token
 import org.mechdancer.console.parser.Result.State.*
-import org.mechdancer.console.scanner.defaultSet
-import org.mechdancer.console.scanner.eraseBy
-import org.mechdancer.console.scanner.splitBy
+import org.mechdancer.console.scanner.defaultScanners
+import org.mechdancer.console.scanner.scanBy
 
 /**
  * 语义分析和执行器
@@ -14,7 +13,7 @@ class Parser {
 	private val userLibrary = mutableMapOf<Rule, Action>()
 	//内部指令集
 	private val coreLibrary = mapOf<Rule, CoreAction>(
-		":help".splitBy(defaultSet) to { sentence, matchers ->
+		":help" scanBy defaultScanners to { sentence, matchers ->
 			true to buildString {
 				(matchers
 					.filter { it.value.length == sentence.size }
@@ -24,7 +23,7 @@ class Parser {
 				deleteCharAt(lastIndex)
 			}
 		},
-		":do".splitBy(defaultSet) to { sentence, matchers ->
+		":do" scanBy defaultScanners to { sentence, matchers ->
 			feedback(sentence, parse(sentence, matchers))
 		}
 	)
@@ -38,7 +37,7 @@ class Parser {
 
 	/** 添加规则和动作 */
 	operator fun set(example: String, action: Action) {
-		example.eraseBy(defaultSet)
+		(example scanBy defaultScanners)
 			//检查 规则有效 且 不存在相同规则
 			.takeIf { sentence ->
 				sentence.isNotEmpty() && (userLibrary match sentence).values.none { it.success }
@@ -53,7 +52,7 @@ class Parser {
 			.readLines()
 			.forEach { command ->
 				//分词
-				val sentence = command.splitBy(defaultSet)
+				val sentence = command.scanBy(defaultScanners)
 				if (sentence.isEmpty()) return
 				//指令分析
 				val (inner, user) = analyze(sentence)

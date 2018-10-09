@@ -1,4 +1,4 @@
-package org.mechdancer.scanner
+package org.mechdancer.console.scanner
 
 import org.mechdancer.console.core.Token
 
