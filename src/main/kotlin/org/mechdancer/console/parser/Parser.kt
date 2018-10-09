@@ -70,6 +70,9 @@ class Parser {
 						?: cannotMatch
 				//内部指令无效
 				else feedback(user, parse(user, matchers))
+			}.map {
+				//转字符串
+				it.first to it.second.toString()
 			}
 
 	private companion object {
