@@ -22,8 +22,6 @@ data class Token<T>(val type: TokenType, val data: T? = null) {
 			Word         -> "[word]"
 			Note         -> ""
 			Key          -> "[key]"
-			WordSplitter -> " "
-			LineSplitter -> "\n"
 		}
 
 	/** 判断另一词是否与此例匹配 */
@@ -35,8 +33,6 @@ data class Token<T>(val type: TokenType, val data: T? = null) {
 			Word         -> actual.type == Word && (null == text || actual.text == text)
 			Note         -> throw IllegalArgumentException("note appeared in rule")
 			Key          -> true
-			WordSplitter -> actual.type == WordSplitter
-			LineSplitter -> actual.type == LineSplitter
 		}
 
 	/** 判断另一词是否不与此例匹配 */

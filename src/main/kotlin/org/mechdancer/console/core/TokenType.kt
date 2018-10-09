@@ -9,7 +9,5 @@ enum class TokenType {
 	Sign,
 	Word,
 	Note,
-	WordSplitter,
-	LineSplitter,
 	Key
 }
