@@ -4,7 +4,7 @@ import org.mechdancer.console.core.Token
 import org.mechdancer.console.core.TokenType.Sign
 
 class SignScanner(
-	val extensionSet: Set<String> = defaultExtensionSet
+	private val extensionSet: Set<String> = defaultExtensionSet
 ) : CharScanner {
 	private val buffer =
 		CharArray(extensionSet.map { it.length }.max() ?: 1) { ' ' }
@@ -31,8 +31,9 @@ class SignScanner(
 	}
 
 	override fun reset(e: Char?) {
-		remain = 0
+		remain = 1
 		buffer.fill(' ')
+		e?.let(::offer)
 	}
 
 	override fun build(erase: Boolean) =

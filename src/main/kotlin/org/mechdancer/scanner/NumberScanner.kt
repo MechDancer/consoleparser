@@ -4,10 +4,14 @@ import org.mechdancer.console.core.Token
 import org.mechdancer.console.core.TokenType
 import org.mechdancer.console.core.TokenType.Integer
 
+/**
+ * 数字扫描器
+ */
 class NumberScanner : CharScanner {
+	//内部状态
 	private var state = default
 
-	override var remain = 0
+	override var remain = 1
 		private set
 
 	override fun offer(e: Char) {
@@ -19,7 +23,8 @@ class NumberScanner : CharScanner {
 
 	override fun reset(e: Char?) {
 		state = default
-		remain = 0
+		remain = 1
+		e?.let(::offer)
 	}
 
 	override fun build(erase: Boolean) =
@@ -49,6 +54,7 @@ class NumberScanner : CharScanner {
 		// 判断状态：确定进制前
 		fun formatWaiting() = format == 0
 
+		// 当前状态下的有效字符集
 		val set
 			get() = when (format) {
 				-1, 0 -> intSet
@@ -58,8 +64,10 @@ class NumberScanner : CharScanner {
 				else  -> throw RuntimeException()
 			}
 
+		// 添加小数点
 		fun dot() = copy(base = base.toDouble() / format)
 
+		// 插入字符(先判定是否可插入)
 		fun insert(char: Char): State {
 			val value = when (char) {
 				in intSet -> char.toInt() - char_0
@@ -114,17 +122,5 @@ class NumberScanner : CharScanner {
 					else         -> -1 to state
 				}
 			}
-	}
-}
-
-fun main(args: Array<String>) {
-	val scanner = NumberScanner()
-	for (c in "-0x237f.33") {
-		scanner.offer(c)
-		scanner
-			.build()
-			?.toString()
-			?.let(::println)
-			?: println("?")
 	}
 }
