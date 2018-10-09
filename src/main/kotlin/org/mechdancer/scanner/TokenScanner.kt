@@ -6,7 +6,7 @@ package org.mechdancer.scanner
 interface TokenScanner<T, R> {
 	/**
 	 * 向后继续匹配的最少单元数
-	 * -1 : 匹配已经失败
+	 * -n : 匹配已经失败后送入的字符数
 	 *  0 : 随时可以结束
 	 * +n : 仍需匹配的最少单元数
 	 */

@@ -11,7 +11,7 @@ class NumberScanner : CharScanner {
 		private set
 
 	override fun offer(e: Char) {
-		if (remain < 0) return
+		if (remain-- < 0) return
 		val (remain, state) = offer(e, state)
 		this.state = state
 		this.remain = remain
@@ -23,7 +23,7 @@ class NumberScanner : CharScanner {
 	}
 
 	override fun build(erase: Boolean) =
-		if (remain == 0)
+		if (remain <= 0)
 			(state.number as? Int)
 				?.let { Token(Integer, it * state.sign) }
 				?: (state.number as? Double)
@@ -95,23 +95,23 @@ class NumberScanner : CharScanner {
 					'+'               -> +1 to state.copy(sign = +1)
 					'-'               -> +1 to state.copy(sign = -1)
 					'.', in state.set -> offer(e, state.copy(sign = +1))
-					else              -> failed
+					else              -> -1 to state
 				}
 				state.formatUnknown() -> when (e) {
 					'0'               -> +0 to state.copy(format = 0)
 					'.', in state.set -> offer(e, state.copy(format = 10))
-					else              -> failed
+					else              -> -1 to state
 				}
 				state.formatWaiting() -> when (e) {
 					'b'               -> +1 to state.copy(format = 2, base = 1)
 					'x'               -> +1 to state.copy(format = 16, base = 1)
 					'.', in state.set -> offer(e, state.copy(format = 10, base = 1))
-					else              -> failed
+					else              -> -1 to state
 				}
 				else                  -> when (e) {
 					'.'          -> if (state.base !is Double) +1 to state.dot() else failed
 					in state.set -> +0 to state.insert(e)
-					else         -> failed
+					else         -> -1 to state
 				}
 			}
 	}
