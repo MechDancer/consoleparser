@@ -10,15 +10,21 @@ fun main(args: Array<String>) {
 		this["hello world"] = { true to "hello master" }
 		this["hello computer"] = { true to "hello commander" }
 		this["hi"] = { true to "hi" }
-		this["\$num + \$num"] = { true to numbers.first() * numbers.last() }
-		this["print \$word"] = { true to words[1] }
-		this["print \$int"] = { true to integers.first() }
-		this["save \$int"] = { true to integers.first() }
+		this["@num + @num"] = { true to numbers.first() * numbers.last() }
+		this["print @word"] = { true to words[1] }
+		this["print @int"] = { true to integers.first() }
+		this["save @{how are you}"] = { true to integers.first() }
 		this["quit"] = {
 			flag = false
 			true to "bye~"
 		}
 	}
 
-	while (flag) readLine()?.let(parser::invoke)
+	while (flag)
+		readLine()
+			?.let(parser::invoke)
+			?.forEach {
+				val (success, info) = it
+				(if (success) System.out else System.err).println(info)
+			}
 }

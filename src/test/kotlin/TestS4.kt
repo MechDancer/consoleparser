@@ -11,18 +11,17 @@ class TestS4 {
 	fun testS4() {
 		val source = """
 			adfg
-			(* int *)
+			@int
 			12345.76
-			+-67890 0xff  "hello world"(- this is a note
+			+-67890 0xff  //this is a note
 		""".trimIndent()
 		Assert.assertEquals(listOf(
 			Token(Word, "adfg"),
 			Token<Unit>(Integer),
 			Token(Number, 12345.76),
-			Token(Sign, "+-"),
-			Token(Integer, 67890),
-			Token(Integer, 255),
-			Token(Word, "hello world")
+			Token(Sign, "+"),
+			Token(Integer, -67890),
+			Token(Integer, 255)
 		), source scanBy defaultScanners)
 	}
 }
