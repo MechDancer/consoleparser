@@ -35,3 +35,7 @@ val Sentence.keys
 fun buildParser(block: Parser.() -> Unit) =
 	Parser().apply(block)
 
+/** 显示指令反馈 */
+fun display(feedback: Pair<Boolean, String>) =
+	(if (feedback.first) System.out else System.err)
+		.println(feedback.second)
