@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.novoda.gradle.release.PublishExtension
 
 buildscript {
 	repositories {
@@ -7,6 +8,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.jetbrains.dokka:dokka-gradle-plugin")
+		classpath("com.novoda:bintray-release:+")
 	}
 }
 
@@ -15,8 +17,12 @@ plugins {
 	id("org.jetbrains.dokka") version "0.9.16"
 }
 
+apply {
+	plugin("com.novoda.bintray-release")
+}
+
 group = "org.mechdancer"
-version = "0.1.7-SNAPSHOT"
+version = "0.1.7"
 
 repositories {
 	mavenCentral()
@@ -32,4 +38,14 @@ configure<JavaPluginConvention> {
 }
 tasks.withType<KotlinCompile> {
 	kotlinOptions.jvmTarget = "1.8"
+}
+
+
+configure<PublishExtension> {
+	userOrg = "mechdancer"
+	groupId = "org.mechdancer"
+	artifactId = "consoleparser"
+	publishVersion = version.toString()
+	desc = "an idiot lexer"
+	website = "https://github.com/MechDancer/consoleparsere"
 }
