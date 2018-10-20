@@ -17,7 +17,7 @@ class NumberScanner : CharScanner {
 	override fun offer(e: Char) {
 		if (remain-- < 0) return
 		val (remain, state) = offer(e, state)
-		this.state = state
+		this.state = if (remain < this.remain) default else state
 		this.remain = remain
 	}
 
@@ -29,12 +29,7 @@ class NumberScanner : CharScanner {
 
 	override fun build() =
 		state
-			.takeIf {
-				remain <= 0
-					&& !it.signUnknown()
-					&& !it.formatUnknown()
-					&& !it.baseUnknown()
-			}
+			.takeIf { (remain == 0 || remain == -1) && !it.signUnknown() }
 			?.number
 			?.let { num ->
 				(num as? Int)

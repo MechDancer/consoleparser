@@ -10,6 +10,8 @@ fun main(args: Array<String>) {
 		this["@num + @num"] = { true to numbers.first() * numbers.last() }
 		this["print @word"] = { true to words[1] }
 		this["print @int"] = { true to integers.first() }
+		this["A=@num"] = { true to numbers.first() }
+		this["B=@num"] = { true to numbers.first() }
 		this["save @{how are you}"] = { true to integers.first() }
 		this["quit"] = {
 			flag = false

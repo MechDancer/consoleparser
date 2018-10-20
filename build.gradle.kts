@@ -22,7 +22,7 @@ apply {
 }
 
 group = "org.mechdancer"
-version = "0.1.7"
+version = "0.1.7-dev-1"
 
 repositories {
 	mavenCentral()
