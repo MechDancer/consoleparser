@@ -7,7 +7,7 @@ import kotlin.math.min
 typealias Sentence = List<Token<*>>
 
 /** 操作基于指令 */
-typealias Action = Sentence.() -> Pair<Boolean, Any>
+typealias Action = Sentence.() -> Pair<Boolean, Any?>
 
 /** 规则是擦除了内容的句子 */
 typealias Rule = Sentence
@@ -19,7 +19,7 @@ typealias Library = Map<Rule, Action>
 typealias Matchers = Map<Rule, Matcher>
 
 /** 内核操作不但参考指令，还能获取指令与全指令库匹配的结果 */
-typealias CoreAction = (Sentence, Matchers) -> Pair<Boolean, Any>
+typealias CoreAction = (Sentence, Matchers) -> Pair<Boolean, Any?>
 
 /** 内核指令库是内核指令到内核操作的映射 */
 typealias CoreLibrary = Map<Rule, CoreAction>

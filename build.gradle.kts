@@ -13,7 +13,7 @@ buildscript {
 }
 
 plugins {
-	kotlin("jvm") version "1.2.71"
+	kotlin("jvm") version "1.3.0"
 	id("org.jetbrains.dokka") version "0.9.16"
 }
 
@@ -22,7 +22,7 @@ apply {
 }
 
 group = "org.mechdancer"
-version = "0.1.7-dev-1"
+version = "0.1.8-dev-1"
 
 repositories {
 	mavenCentral()
@@ -39,7 +39,6 @@ configure<JavaPluginConvention> {
 tasks.withType<KotlinCompile> {
 	kotlinOptions.jvmTarget = "1.8"
 }
-
 
 configure<PublishExtension> {
 	userOrg = "mechdancer"
