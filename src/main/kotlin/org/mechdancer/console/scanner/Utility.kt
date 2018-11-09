@@ -1,7 +1,7 @@
 package org.mechdancer.console.scanner
 
-import org.mechdancer.console.core.Token
 import org.mechdancer.console.parser.Sentence
+import org.mechdancer.console.token.Token
 
 infix fun String.scanBy(scanners: Set<CharScanner>): Sentence {
 	val sentence = mutableListOf<Token<*>>()

@@ -1,7 +1,7 @@
-package org.mechdancer.console.core
+package org.mechdancer.console.token
 
-import org.mechdancer.console.core.TokenType.*
-import org.mechdancer.console.core.TokenType.Number
+import org.mechdancer.console.token.TokenType.*
+import org.mechdancer.console.token.TokenType.Number
 
 /**
  * 一个词定义为其类别与含义

@@ -1,9 +1,9 @@
 package org.mechdancer.console.parser
 
-import org.mechdancer.console.core.Token
-import org.mechdancer.console.parser.Result.State.*
+import org.mechdancer.console.parser.Result.Status.*
 import org.mechdancer.console.scanner.defaultScanners
 import org.mechdancer.console.scanner.scanBy
+import org.mechdancer.console.token.Token
 
 /**
  * 语义分析和执行器
@@ -14,7 +14,7 @@ class Parser {
 	//内部指令集
 	private val coreLibrary = mapOf<Rule, CoreAction>(
 		":help" scanBy defaultScanners to { sentence, matchers ->
-			true to buildString {
+			buildString {
 				(matchers
 					.filter { it.value.length == sentence.size }
 					.takeIf { it.isNotEmpty() } ?: userLibrary)
@@ -46,11 +46,10 @@ class Parser {
 	}
 
 	/** 解析并执行指令 */
-	operator fun invoke(script: String) =
+	operator fun invoke(script: String): List<Result> =
 		script
 			.reader()
 			.readLines()
-			.asSequence()
 			.map { it scanBy defaultScanners }
 			.filter { it.isNotEmpty() }
 			.map { sentence ->
@@ -67,10 +66,13 @@ class Parser {
 						.firstOrNull()
 						?.second
 						?.invoke(user, matchers)
-						?.let { it.first to it.second.toString() }
+						?.let {
+							if (it !is Throwable) Result(-1, it)
+							else Result(-2, it.message)
+						}
 						?: cannotMatch
 				//内部指令无效
-				else feedback(user, parse(user, matchers))
+				else parse(user, matchers)
 			}
 
 	private companion object {
@@ -78,10 +80,13 @@ class Parser {
 		const val ambiguousText = "there are more than one rules match this sentence, please check your rules"
 
 		//规则集空
-		val noRule = Result(Error, "no rule")
+		val noRule = Result(0, UnsupportedOperationException("no rule"))
 
 		//无法匹配
-		val cannotMatch = false to "can't match any rule"
+		val cannotMatch = Result(0, IllegalArgumentException("can't match any rule"))
+
+		//指令不全
+		fun incompelete(tip: String) = Result(-3, IllegalArgumentException(tip))
 
 		val emptySentence = listOf<Token<*>>()
 
@@ -100,9 +105,9 @@ class Parser {
 			//完全无法匹配
 			val nothing by lazy { length == 0 }
 			return when {
-				incomplete -> Result(Incomplete, rule.tip)
-				nothing    -> Result(Error, "no rule matched", length)
-				else       -> Result(Error, rule.tip, length)
+				incomplete -> incompelete(rule.tip)
+				nothing    -> cannotMatch
+				else       -> Result(length, rule.tip)
 			}
 		}
 
@@ -116,7 +121,7 @@ class Parser {
 			val action by lazy { perfects.values.first().action } //操作
 			return when {
 				//唯一匹配
-				perfects.size == 1 -> action(sentence).let(::Result)
+				perfects.size == 1 -> Result(-1, action(sentence))
 				//歧义匹配
 				perfects.size > 1  -> throw RuntimeException(ambiguousText)
 				//无任何规则完全匹配
@@ -129,30 +134,37 @@ class Parser {
 			}
 		}
 
+		@JvmStatic
+		val Result.message
+			get() = when (data) {
+				is String    -> data
+				is Throwable -> data.message ?: ""
+				else         -> ""
+			}
+
 		//组织反馈信息
 		@JvmStatic
 		fun feedback(sentence: Sentence, result: Result) =
-			if (result.positive) true to result.info
-			else false to buildString {
-				when (result.what) {
-					Success    -> Unit
-					Failure    -> append(result.info)
-					Error      -> {
-						append("invalid command: ")
-						sentence.map { it.text }
-							.forEachIndexed { i, text ->
-								append(if (i == result.where) "> $text < " else "$text ")
-							}
-						if (result.info.isNotBlank())
-							append("\n${result.info}")
-					}
-					Incomplete -> {
-						append("incomplete command: ")
-						sentence.forEach { append("${it.text} ") }
-						append("...")
-						if (result.info.isNotBlank())
-							append("\n${result.info}")
-					}
+			result.positive to when (result.status) {
+				Success,
+				Failure    -> result.data
+				Error      -> buildString {
+					append("invalid command: ")
+					sentence.map { it.text }
+						.forEachIndexed { i, text ->
+							append(if (i == result.what) "> $text < " else "$text ")
+						}
+					result.message
+						.takeIf(String::isNotBlank)
+						?.let { append("\n$it") }
+				}
+				Incomplete -> buildString {
+					append("incomplete command: ")
+					sentence.forEach { append("${it.text} ") }
+					append("...")
+					result.message
+						.takeIf(String::isNotBlank)
+						?.let { append("\n$it") }
 				}
 			}
 

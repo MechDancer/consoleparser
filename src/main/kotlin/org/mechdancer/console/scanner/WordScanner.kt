@@ -1,7 +1,7 @@
 package org.mechdancer.console.scanner
 
-import org.mechdancer.console.core.Token
-import org.mechdancer.console.core.TokenType.Word
+import org.mechdancer.console.token.Token
+import org.mechdancer.console.token.TokenType.Word
 
 class WordScanner : CharScanner {
 	private val buffer = StringBuilder()

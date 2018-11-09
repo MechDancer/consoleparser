@@ -1,4 +1,4 @@
-package org.mechdancer.console.core
+package org.mechdancer.console.token
 
 /**
  * 标签类别

@@ -1,7 +1,7 @@
 package org.mechdancer.console.scanner
 
-import org.mechdancer.console.core.Token
-import org.mechdancer.console.core.TokenType.Sign
+import org.mechdancer.console.token.Token
+import org.mechdancer.console.token.TokenType.Sign
 
 class SignScanner(
 	private val extensionSet: Set<String> = defaultExtensionSet

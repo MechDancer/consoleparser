@@ -1,10 +1,10 @@
 import org.junit.Assert
 import org.junit.Test
-import org.mechdancer.console.core.Token
-import org.mechdancer.console.core.TokenType.*
-import org.mechdancer.console.core.TokenType.Number
 import org.mechdancer.console.scanner.defaultScanners
 import org.mechdancer.console.scanner.scanBy
+import org.mechdancer.console.token.Token
+import org.mechdancer.console.token.TokenType.*
+import org.mechdancer.console.token.TokenType.Number
 
 class TestS4 {
 	@Test

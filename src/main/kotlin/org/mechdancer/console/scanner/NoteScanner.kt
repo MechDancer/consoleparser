@@ -1,7 +1,7 @@
 package org.mechdancer.console.scanner
 
-import org.mechdancer.console.core.Token
-import org.mechdancer.console.core.TokenType.Note
+import org.mechdancer.console.token.Token
+import org.mechdancer.console.token.TokenType.Note
 
 /**
  * 注释扫描

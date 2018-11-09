@@ -1,7 +1,7 @@
 package org.mechdancer.console.parser
 
-import org.mechdancer.console.core.TokenType.*
-import org.mechdancer.console.core.TokenType.Number
+import org.mechdancer.console.token.TokenType.*
+import org.mechdancer.console.token.TokenType.Number
 
 /** 取出句子中所有整数 */
 val Sentence.integers
