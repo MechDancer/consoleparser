@@ -55,7 +55,6 @@ class KeyScanner : CharScanner {
 			?.toString()
 			?.let { key ->
 				when (key.toLowerCase()) {
-					"int"  -> Integer
 					"num"  -> Number
 					"sign" -> Sign
 					"word" -> Word

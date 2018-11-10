@@ -2,7 +2,6 @@ package org.mechdancer.console.scanner
 
 import org.mechdancer.console.token.Token
 import org.mechdancer.console.token.TokenType
-import org.mechdancer.console.token.TokenType.Integer
 
 /**
  * 数字扫描器
@@ -33,7 +32,7 @@ class NumberScanner : CharScanner {
 			?.number
 			?.let { num ->
 				(num as? Int)
-					?.let { Token(Integer, it * state.sign) }
+					?.let { Token(TokenType.Number, it * state.sign) }
 					?: (num as? Double)
 						?.let { Token(TokenType.Number, it * state.sign) }
 			}

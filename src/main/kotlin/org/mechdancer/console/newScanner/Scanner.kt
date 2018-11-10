@@ -40,7 +40,6 @@ interface Scanner {
 				TokenType.Word    -> buildDFA(parameters[type]!!)
 				TokenType.Note    -> buildDFA(parameters[type]!!)
 				TokenType.Key     -> buildDFA(parameters[type]!!)
-				TokenType.Integer -> null
 			}
 
 		private fun Char.isD() = isLetter() || this == '_'
