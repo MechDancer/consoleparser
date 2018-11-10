@@ -63,4 +63,14 @@ class TestNewScanner {
 			6 to true to "0.2333",
 			3 to true to ".23.33") test Scanner[Number]!!
 	}
+
+	@Test
+	fun testSign() {
+		listOf(
+			3 to true to "===",
+			1 to true to "!",
+			0 to false to "123",
+			1 to true to "()",
+			3 to true to "....") test Scanner[Sign]!!
+	}
 }
