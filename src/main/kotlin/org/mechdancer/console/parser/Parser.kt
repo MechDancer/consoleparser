@@ -1,6 +1,5 @@
 package org.mechdancer.console.parser
 
-import org.mechdancer.console.parser.Result.Status.*
 import org.mechdancer.console.scanner.defaultScanners
 import org.mechdancer.console.scanner.scanBy
 import org.mechdancer.console.token.Token
@@ -16,15 +15,12 @@ class Parser {
 		":help" scanBy defaultScanners to { sentence, matchers ->
 			buildString {
 				(matchers
-					.filter { it.value.length == sentence.size }
-					.takeIf { it.isNotEmpty() } ?: userLibrary)
+					 .filter { it.value.length == sentence.size }
+					 .takeIf { it.isNotEmpty() } ?: userLibrary)
 					.keys
 					.forEach { appendln(it.ruleView()) }
 				deleteCharAt(lastIndex)
 			}
-		},
-		":do" scanBy defaultScanners to { sentence, matchers ->
-			feedback(sentence, parse(sentence, matchers))
 		}
 	)
 
@@ -42,7 +38,7 @@ class Parser {
 			.takeIf { sentence ->
 				sentence.isNotEmpty() && (userLibrary match sentence).values.none { it.success }
 			}?.let { userLibrary[it] = action }
-			?: throw RuntimeException("rule \"$example\" already exist")
+		?: throw RuntimeException("rule \"$example\" already exist")
 	}
 
 	/** 解析并执行指令 */
@@ -50,8 +46,9 @@ class Parser {
 		script
 			.reader()
 			.readLines()
+			.filterNot(String::isBlank)
 			.map { it scanBy defaultScanners }
-			.filter { it.isNotEmpty() }
+			.filterNot(Sentence::isEmpty)
 			.map { sentence ->
 				//指令分析
 				val (inner, user) = analyze(sentence)
@@ -70,7 +67,7 @@ class Parser {
 							if (it !is Throwable) Result(-1, it)
 							else Result(-2, it.message)
 						}
-						?: cannotMatch
+					?: cannotMatch
 				//内部指令无效
 				else parse(user, matchers)
 			}
@@ -130,7 +127,7 @@ class Parser {
 						.mapValues { it.value.length }
 						.maxBy { it.value }
 						?.let { best -> cannotMatch(sentence.size, best) }
-						?: noRule
+					?: noRule
 			}
 		}
 
@@ -140,32 +137,6 @@ class Parser {
 				is String    -> data
 				is Throwable -> data.message ?: ""
 				else         -> ""
-			}
-
-		//组织反馈信息
-		@JvmStatic
-		fun feedback(sentence: Sentence, result: Result) =
-			result.positive to when (result.status) {
-				Success,
-				Failure    -> result.data
-				Error      -> buildString {
-					append("invalid command: ")
-					sentence.map { it.text }
-						.forEachIndexed { i, text ->
-							append(if (i == result.what) "> $text < " else "$text ")
-						}
-					result.message
-						.takeIf(String::isNotBlank)
-						?.let { append("\n$it") }
-				}
-				Incomplete -> buildString {
-					append("incomplete command: ")
-					sentence.forEach { append("${it.text} ") }
-					append("...")
-					result.message
-						.takeIf(String::isNotBlank)
-						?.let { append("\n$it") }
-				}
 			}
 
 		//匹配

@@ -35,7 +35,32 @@ val Sentence.keys
 fun buildParser(block: Parser.() -> Unit) =
 	Parser().apply(block)
 
-/** 显示指令反馈 */
-fun display(feedback: Pair<Boolean, String>) =
-	(if (feedback.first) System.out else System.err)
-		.println(feedback.second)
+///** 显示指令反馈 */
+//fun display(feedback: Pair<Boolean, String>) =
+//	(if (feedback.first) System.out else System.err)
+//		.println(feedback.second)
+//
+////组织反馈信息
+//fun feedback(sentence: Sentence, result: Result) =
+//	result.positive to when (result.status) {
+//		Result.Status.Success,
+//		Result.Status.Failure    -> result.data
+//		Result.Status.Error      -> buildString {
+//			append("invalid command: ")
+//			sentence.map { it.text }
+//				.forEachIndexed { i, text ->
+//					append(if (i == result.what) "> $text < " else "$text ")
+//				}
+//			result.message
+//				.takeIf(String::isNotBlank)
+//				?.let { append("\n$it") }
+//		}
+//		Result.Status.Incomplete -> buildString {
+//			append("incomplete command: ")
+//			sentence.forEach { append("${it.text} ") }
+//			append("...")
+//			result.message
+//				.takeIf(String::isNotBlank)
+//				?.let { append("\n$it") }
+//		}
+//	}

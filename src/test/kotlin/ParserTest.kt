@@ -1,4 +1,7 @@
-import org.mechdancer.console.parser.*
+import org.mechdancer.console.parser.buildParser
+import org.mechdancer.console.parser.integers
+import org.mechdancer.console.parser.numbers
+import org.mechdancer.console.parser.words
 
 fun main(args: Array<String>) {
 	var flag = true
@@ -19,5 +22,5 @@ fun main(args: Array<String>) {
 		}
 	}
 
-	while (flag) readLine()?.let(parser::invoke)?.forEach(::display)
+	//while (flag) readLine()?.let(parser::invoke)?.forEach(::display)
 }
