@@ -2,6 +2,7 @@ package org.mechdancer.console.newScanner
 
 import org.mechdancer.console.token.TokenType
 import org.mechdancer.console.token.TokenType.*
+import org.mechdancer.console.token.TokenType.Number
 import kotlin.math.abs
 
 /**
@@ -73,7 +74,7 @@ class Scanner(
 		private fun Char.isd() = isDigit()
 
 		private val parameters = mapOf(
-			Note to Triple(// 0  1  2    //
+			Note to Triple(// /  *  e    //
 				listOf(listOf(2, 0, 0),  // 1 -> ε
 				       listOf(7, 3, 0),  // 2 -> /
 				       listOf(6, 4, 6),  // 3 -> /*
@@ -90,7 +91,7 @@ class Scanner(
 					}
 				}
 			),
-			Word to Triple(// 0  1    //
+			Word to Triple(// D  d    //
 				listOf(listOf(2, 0),  // 1
 				       listOf(2, 2)), // 2
 				setOf(2),
@@ -102,7 +103,7 @@ class Scanner(
 					}
 				}
 			),
-			Key to Triple(//  0  1  2  3  4  5    //
+			Key to Triple(//  @  D  d  {  }  e    //
 				listOf(listOf(2, 0, 0, 0, 0, 0),  // 1 -> ε
 				       listOf(0, 3, 0, 4, 0, 0),  // 2 -> @
 				       listOf(0, 3, 3, 0, 0, 0),  // 3 -> @ ...
@@ -118,6 +119,34 @@ class Scanner(
 						c == '{' -> 3
 						c == '}' -> 4
 						else     -> 5
+					}
+				}
+			),
+			Number to Triple(//0   1   d   b   h  x   .    //
+				listOf(listOf(+2, 11, 11, +0, +0, 0, 12),  // 1  ->
+				       listOf(11, 11, 11, +3, +0, 7, 12),  // 2  ->
+				       listOf(+4, +4, +0, +0, +0, 0, +5),  // 3  ->
+				       listOf(+4, +4, +0, +0, +0, 0, +5),  // 4  ->
+				       listOf(+6, +6, +0, +0, +0, 0, +0),  // 5  ->
+				       listOf(+6, +6, +0, +0, +0, 0, +0),  // 6  ->
+				       listOf(+8, +8, +8, +8, +8, 0, +9),  // 7  ->
+				       listOf(+8, +8, +8, +8, +8, 0, +9),  // 8  ->
+				       listOf(10, 10, 10, 10, 10, 0, +0),  // 9  ->
+				       listOf(10, 10, 10, 10, 10, 0, +0),  // 10 ->
+				       listOf(11, 11, 11, +0, +0, 0, 12),  // 11 ->
+				       listOf(13, 13, 13, +0, +0, 0, +0),  // 12 ->
+				       listOf(13, 13, 13, +0, +0, 0, +0)), // 13 ->
+				setOf(4, 6, 8, 10, 11, 13),
+				{ c: Char ->
+					when (c.toLowerCase()) {
+						'0'         -> 0  // 0
+						'1'         -> 1  // 1
+						in '0'..'9' -> 2  // d
+						'b'         -> 3  // b
+						in 'a'..'f' -> 4  // h
+						'x'         -> 5  // x
+						'.'         -> 6  // .
+						else        -> -1 // e
 					}
 				}
 			)
