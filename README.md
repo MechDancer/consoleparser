@@ -1,5 +1,8 @@
 # 控制台指令解析器
 
+[![Download](https://api.bintray.com/packages/mechdancer/maven/consoleparser/images/download.svg)](https://bintray.com/mechdancer/maven/consoleparser/_latestVersion)
+[![Build Status](https://travis-ci.com/MechDancer/consoleparser.svg?branch=master)](https://travis-ci.com/MechDancer/consoleparser)
+
 ## 使用说明
 
 ### 步骤一 构造规则和动作
@@ -49,6 +52,48 @@ result?.map(::feedback)?.forEach(::display)
 
 `Parser::invoke` 返回一个列表，其中包含已分词的指令和结果，可以直接使用。若不需要处理运行时异常，可使用内置的 `feedback` 函数进行预处理。`feedback` 函数会将所有运行时异常的信息进行格式化，转换为字符串，对于非异常的结果的不做处理。如果只想在命令行显示结果，可以再调用 `display` 函数将结果通过标准输出流或标准错误流打印到控制台。
 
+## 开始使用
+
+* Gradle
+* Maven
+* Bintray
+
+您需要将其添加至  [仓库和依赖](https://docs.gradle.org/current/userguide/declaring_dependencies.html) 中。
+
+### Gradle
+
+```groovy
+repositories {
+    jcenter()
+}
+dependencies {
+    compile 'org.mechdancer:consoleparser:+'
+}
+```
+
+### Maven
+
+```xml
+<repositories>
+   <repository>
+     <id>jcenter</id>
+     <name>JCenter</name>
+     <url>https://jcenter.bintray.com/</url>
+   </repository>
+</repositories>
+
+<dependency>
+  <groupId>org.mechdancer</groupId>
+  <artifactId>consoleparser</artifactId>
+  <version>LATEST</version>
+  <type>pom</type>
+</dependency>
+```
+
+### Bintray
+
+您总可以从 bintray 直接下载 jar： [![Download](https://api.bintray.com/packages/mechdancer/maven/consoleparser/images/download.svg)](https://bintray.com/mechdancer/maven/consoleparser/_latestVersion)
+
 ## 示例
 
-要查看示例，请访问[这里](src/test/kotlin/ParserTest.kt)。
+要查看示例，请访问 [这里](src/test/kotlin/ParserTest.kt)。
