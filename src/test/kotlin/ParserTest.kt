@@ -7,7 +7,7 @@ fun main(args: Array<String>) {
 		this["hello world"] = { "hello master" }
 		this["hello computer"] = { "hello commander" }
 		this["hi"] = { "hi" }
-		this["@num + @num"] = { numbers.first() * numbers.last() }
+		this["@num / @num"] = { numbers.first() / numbers.last() }
 		this["print @word"] = { words[1] }
 		this["A=@num"] = { numbers.first() }
 		this["B=@num"] = { numbers.first() }

@@ -4,6 +4,8 @@ import org.mechdancer.console.parser.Parser.*
 import org.mechdancer.console.token.Token
 import org.mechdancer.console.token.Token.Type.*
 import org.mechdancer.console.token.Token.Type.Number
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 
 /** 句子是词的列表 */
 typealias Sentence = List<Token<*>>
@@ -51,7 +53,14 @@ fun feedback(result: Map.Entry<Sentence, *>): Pair<Boolean, *> {
 			append("you mean \"${data.rule.joinToString(" ")}\"?")
 		}
 		is ParseException       -> false to data.message
-		else                    -> false to data
+		else                    -> false to buildString {
+			appendln("${data.javaClass.simpleName} thrown during running")
+			ByteArrayOutputStream()
+				.apply { data.printStackTrace(PrintStream(this)) }
+				.toByteArray()
+				.let { String(it) }
+				.let(this::append)
+		}
 	}
 }
 

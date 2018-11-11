@@ -43,6 +43,15 @@ class Parser {
 		?: throw RuntimeException("rule \"$example\" already exist")
 	}
 
+	fun <T> T.letCatching(block: (T) -> Any?) =
+		let {
+			try {
+				block(it)
+			} catch (e: Throwable) {
+				e
+			}
+		}
+
 	// 解析并执行指令
 	private fun parse(sentence: Sentence): Any? {
 		//指令分析
@@ -50,12 +59,12 @@ class Parser {
 		//用户指令匹配
 		return if (core.isNotEmpty()) {
 			val cMatchers = coreLibrary match core
-			cMatchers.successOrNull()?.let(coreLibrary::get)?.invoke(user)
+			cMatchers.successOrNull()?.let(coreLibrary::get)?.letCatching { it(user) }
 			?: cMatchers cannotMatch sentence
 			?: ParseException("unknown core command \"${core.joinToString(" ")}\"")
 		} else {
 			val uMatchers = userLibrary match user
-			uMatchers.successOrNull()?.let(userLibrary::get)?.invoke(user)
+			uMatchers.successOrNull()?.let(userLibrary::get)?.letCatching { it(user) }
 			?: uMatchers cannotMatch sentence
 			?: ParseException("unknown command \"${user.joinToString(" ")}\"")
 		}
