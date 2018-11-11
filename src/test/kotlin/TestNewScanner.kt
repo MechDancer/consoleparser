@@ -29,6 +29,7 @@ class TestNewScanner {
 	fun testWord() {
 		listOf(
 			4 to true to "word",
+			0 to false to ":help",
 			0 to false to "123",
 			4 to true to "a123*/",
 			1 to true to "a + b",

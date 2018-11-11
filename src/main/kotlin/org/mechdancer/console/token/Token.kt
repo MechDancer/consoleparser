@@ -9,26 +9,16 @@ import org.mechdancer.console.token.TokenType.Number
  * @param type 词性
  * @param data 词义
  */
-data class Token<T>(val type: TokenType, val data: T? = null) {
-	/** 转字符 */
-	val text get() = (data as? String) ?: data?.toString()
-
+data class Token<T>(val type: TokenType, val data: T) {
 	/** 按类型显示 */
-	override fun toString() =
-		text ?: when (type) {
-			Number -> "[num]"
-			Sign   -> "[sign]"
-			Word   -> "[word]"
-			Note   -> ""
-			Key    -> "[key]"
-		}
+	override fun toString() = (data as? String) ?: data.toString()
 
 	/** 判断另一词是否与此例匹配 */
 	infix fun match(actual: Token<*>) =
 		when (type) {
 			Number -> actual.type == Number
-			Sign   -> actual.type == Sign && (null == text || actual.text == text)
-			Word   -> actual.type == Word && (null == text || actual.text == text)
+			Sign   -> actual.type == Sign && (toString().isBlank() || actual.toString() == toString())
+			Word   -> actual.type == Word && (toString().isBlank() || actual.toString() == toString())
 			Note   -> throw IllegalArgumentException("note appeared in rule")
 			Key    -> true
 		}

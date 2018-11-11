@@ -47,7 +47,14 @@ private infix fun <T> Map<Scanner<T>, TokenType>.build(text: String) =
 		Sign   -> Token(type, text)
 		Word   -> Token(type, text)
 		Note   -> Token(type, text.trim())
-		Key    -> Token(type, text.buildKey())
+		Key    -> text.buildKey().let {
+			when (it) {
+				"num"  -> Token(Number, "[num]")
+				"word" -> Token(Word, "[word]")
+				"sign" -> Token(Sign, "[sign]")
+				else   -> Token(Key, "[key]")
+			}
+		}
 	}
 
 infix fun String.scanBy(pairs: Map<Scanner<Char>, TokenType>): Sentence {
@@ -63,7 +70,7 @@ infix fun String.scanBy(pairs: Map<Scanner<Char>, TokenType>): Sentence {
 		m = p
 		scanners.reset()
 	}
-	if (m < p - 1) sentence += pairs build substring(m, p - 1)
+	if (m < p) sentence += pairs build substring(m, p)
 
 	return sentence
 }
@@ -72,5 +79,8 @@ fun scan(string: String) = string scanBy TokenType.values().associate { Scanner[
 
 fun main(args: Array<String>) {
 	scan("hello .12345+++++0x678.90 => ok! /*this is a note*/ @{look at me} @{num}  @{ } ++=>  ")
-		.forEach { println("${it.type}: \t${it.text}") }
+		.forEach { println("${it.type}: \t$it") }
+
+	scan(":help")
+		.forEach { println("${it.type}: \t$it") }
 }
