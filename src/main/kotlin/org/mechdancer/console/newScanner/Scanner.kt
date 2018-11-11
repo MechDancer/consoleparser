@@ -1,8 +1,10 @@
 package org.mechdancer.console.newScanner
 
 import org.mechdancer.console.token.TokenType
+import org.mechdancer.console.token.TokenType.*
+import org.mechdancer.console.token.TokenType.Number
 
-interface Scanner {
+interface Scanner<T> {
 	/**
 	 * 最长匹配长度
 	 */
@@ -17,7 +19,7 @@ interface Scanner {
 	 * 匹配一个字符
 	 * @param char 将进行匹配的字符
 	 */
-	operator fun invoke(char: Char)
+	operator fun invoke(char: T)
 
 	/**
 	 * 重置内部状态
@@ -25,28 +27,28 @@ interface Scanner {
 	fun reset()
 
 	companion object {
-		private fun buildDFA(
-			parameter: Triple<List<List<Int>>, Set<Int>, (Char) -> Int>
-		): DFA {
+		private fun <T> buildDFA(
+			parameter: Triple<List<List<Int>>, Set<Int>, (T) -> Int>
+		): DFA<T> {
 			val (table, ending, map) = parameter
 			return DFA(table, ending, map)
 		}
 
 		@JvmStatic
-		operator fun get(type: TokenType): Scanner? =
+		operator fun get(type: TokenType): Scanner<Char>? =
 			when (type) {
-				TokenType.Number  -> buildDFA(parameters[type]!!)
-				TokenType.Sign    -> SignScanner()
-				TokenType.Word    -> buildDFA(parameters[type]!!)
-				TokenType.Note    -> buildDFA(parameters[type]!!)
-				TokenType.Key     -> buildDFA(parameters[type]!!)
+				Number -> buildDFA(parameters[type]!!)
+				Sign   -> SignScanner()
+				Word   -> buildDFA(parameters[type]!!)
+				Note   -> buildDFA(parameters[type]!!)
+				Key    -> buildDFA(parameters[type]!!)
 			}
 
 		private fun Char.isD() = isLetter() || this == '_'
 		private fun Char.isd() = isDigit()
 
 		private val parameters = mapOf(
-			TokenType.Note to Triple(// /  *  e    //
+			Note to Triple(// /  *  e    //
 				listOf(listOf(2, 0, 0),  // 1 -> ε
 				       listOf(7, 3, 0),  // 2 -> /
 				       listOf(6, 4, 6),  // 3 -> /*
@@ -63,7 +65,7 @@ interface Scanner {
 					}
 				}
 			),
-			TokenType.Word to Triple(// D  d    //
+			Word to Triple(// D  d    //
 				listOf(listOf(2, 0),  // 1
 				       listOf(2, 2)), // 2
 				setOf(2),
@@ -75,7 +77,7 @@ interface Scanner {
 					}
 				}
 			),
-			TokenType.Key to Triple(//  @  D  d  {  }  e    //
+			Key to Triple(//  @  D  d  {  }  e    //
 				listOf(listOf(2, 0, 0, 0, 0, 0),  // 1 -> ε
 				       listOf(0, 3, 0, 4, 0, 0),  // 2 -> @
 				       listOf(0, 3, 3, 0, 0, 0),  // 3 -> @ ...
@@ -94,7 +96,7 @@ interface Scanner {
 					}
 				}
 			),
-			TokenType.Number to Triple(//0   1   d   b   h  x   .    //
+			Number to Triple(//0   1   d   b   h  x   .    //
 				listOf(listOf(+2, 11, 11, +0, +0, 0, 12),  // 1  ->
 				       listOf(11, 11, 11, +3, +0, 7, 12),  // 2  ->
 				       listOf(+4, +4, +0, +0, +0, 0, +5),  // 3  ->

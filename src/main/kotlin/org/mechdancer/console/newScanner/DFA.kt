@@ -8,11 +8,11 @@ import kotlin.math.abs
  * @param ending 合法结束状态
  * @param map    字符到转移表列序号的映射关系（*-1 表示无效字符*）
  */
-class DFA(
+class DFA<T>(
 	private val table: List<List<Int>>,
 	private val ending: Set<Int>,
-	private val map: (Char) -> Int
-) : Scanner {
+	private val map: (T) -> Int
+) : Scanner<T> {
 	// 当前状态（序号）
 	// 正数表示正在匹配
 	// 负数表示匹配失败前的最后状态，即能匹配的部分的结束状态
@@ -21,7 +21,7 @@ class DFA(
 	override var length: Int = 0; private set
 	override val complete get() = abs(state) in ending
 
-	override operator fun invoke(char: Char) {
+	override operator fun invoke(char: T) {
 		if (state > 0) {
 			state = map(char)
 				// 是一个有意义的字符

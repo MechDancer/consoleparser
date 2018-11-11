@@ -1,8 +1,13 @@
 package org.mechdancer.console.newScanner
 
+/**
+ * 符号扫描器
+ * 采用传统算法
+ * @param extensionSet 扩充符号集
+ */
 class SignScanner(
 	private val extensionSet: Set<String> = defaultExtensionSet
-) : Scanner {
+) : Scanner<Char> {
 	private var state = 0
 	override val length get() = state.takeIf { it >= 0 } ?: -(state + 1)
 	override val complete get() = length > 0

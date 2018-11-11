@@ -6,7 +6,7 @@ import org.mechdancer.console.token.TokenType.Number
 
 class TestNewScanner {
 	// （匹配长度 - 是否完整） - 测试用例
-	private infix fun List<Pair<Pair<Int, Boolean>, String>>.test(scanner: Scanner) {
+	private infix fun List<Pair<Pair<Int, Boolean>, String>>.test(scanner: Scanner<Char>) {
 		for ((target, test) in this) {
 			for (char in test) scanner(char)
 			Assert.assertEquals(target, scanner.length to scanner.complete)
@@ -71,6 +71,7 @@ class TestNewScanner {
 			1 to true to "!",
 			0 to false to "123",
 			1 to true to "()",
+			2 to true to "<-",
 			3 to true to "....") test Scanner[Sign]!!
 	}
 }
