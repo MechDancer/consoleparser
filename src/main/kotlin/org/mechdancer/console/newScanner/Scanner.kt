@@ -1,8 +1,8 @@
 package org.mechdancer.console.newScanner
 
-import org.mechdancer.console.token.TokenType
-import org.mechdancer.console.token.TokenType.*
-import org.mechdancer.console.token.TokenType.Number
+import org.mechdancer.console.token.Token.Type
+import org.mechdancer.console.token.Token.Type.*
+import org.mechdancer.console.token.Token.Type.Number
 
 interface Scanner<T> {
 	/**
@@ -35,7 +35,7 @@ interface Scanner<T> {
 		}
 
 		@JvmStatic
-		operator fun get(type: TokenType): Scanner<Char>? =
+		operator fun get(type: Type): Scanner<Char>? =
 			when (type) {
 				Number -> buildDFA(parameters[type]!!)
 				Sign   -> SignScanner()

@@ -2,15 +2,16 @@ package org.mechdancer.console.parser
 
 import org.mechdancer.console.newScanner.scan
 import org.mechdancer.console.token.Token
+import kotlin.math.min
 
 /**
  * 语义分析和执行器
  */
 class Parser {
 	//用户指令集
-	private val userLibrary = mutableMapOf<Rule, Action>()
+	private val userLibrary = mutableMapOf<Sentence, Action>()
 	//内部指令集
-	private val coreLibrary = mapOf<Rule, Action>(
+	private val coreLibrary = mapOf<Sentence, Action>(
 		scan(":help") to { user: Sentence ->
 			buildString {
 				((userLibrary match user)
@@ -68,30 +69,53 @@ class Parser {
 			.filterNot(Sentence::isEmpty)
 			.associate { it to parse(it) }
 
+	/**
+	 * 匹配结果
+	 * @param length  匹配长度
+	 * @param success 是否匹配成功
+	 */
+	private data class Matcher(
+		val length: Int,
+		val success: Boolean
+	)
+
+	class CannotMatchException(val rule: Sentence, val where: Int) : IllegalArgumentException()
+	class IncompleteException(val rule: Sentence) : IllegalArgumentException()
+	class ParseException(msg: String) : IllegalArgumentException(msg)
+
 	private companion object {
 		// 判断多个元素相等
 		@JvmStatic
 		fun <T> equal(vararg list: T) = list.distinct().size == 1
 
-		// 匹配规则
+		// 匹配单个规则
 		@JvmStatic
-		infix fun Library.match(sentence: Sentence) =
+		operator fun Sentence.get(sentence: Sentence): Int {
+			val length = min(lastIndex, sentence.lastIndex)
+			for (i in 0..length)
+				if (this[i] notMatch sentence[i]) return i
+			return length + 1
+		}
+
+		// 匹配规则集
+		@JvmStatic
+		infix fun Map<Sentence, Action>.match(sentence: Sentence) =
 			mapValues {
 				val rule = it.key
 				val length = rule[sentence]
-				Matcher(length, sentence.size == rule.size && sentence.size == length)
+				Matcher(length, equal(sentence.size, rule.size, length))
 			}
 
 		// 成功匹配的规则或空
 		@JvmStatic
-		fun Map<Rule, Matcher>.successOrNull() =
+		fun Map<Sentence, Matcher>.successOrNull() =
 			filterValues(Matcher::success)
 				.keys
 				.singleOrNull()
 
 		// 从最优匹配信息产生匹配异常
 		@JvmStatic
-		infix fun Map<Rule, Matcher>.cannotMatch(sentence: Sentence) =
+		infix fun Map<Sentence, Matcher>.cannotMatch(sentence: Sentence) =
 			maxBy { it.value.length }
 				?.takeIf { it.value.length > 0 }
 				?.let {

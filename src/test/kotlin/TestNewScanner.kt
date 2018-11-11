@@ -1,8 +1,9 @@
+
 import org.junit.Assert
 import org.junit.Test
 import org.mechdancer.console.newScanner.Scanner
-import org.mechdancer.console.token.TokenType.*
-import org.mechdancer.console.token.TokenType.Number
+import org.mechdancer.console.token.Token.Type.*
+import org.mechdancer.console.token.Token.Type.Number
 
 class TestNewScanner {
 	// （匹配长度 - 是否完整） - 测试用例

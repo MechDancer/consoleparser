@@ -2,9 +2,9 @@ package org.mechdancer.console.newScanner
 
 import org.mechdancer.console.parser.Sentence
 import org.mechdancer.console.token.Token
-import org.mechdancer.console.token.TokenType
-import org.mechdancer.console.token.TokenType.*
-import org.mechdancer.console.token.TokenType.Number
+import org.mechdancer.console.token.Token.Type
+import org.mechdancer.console.token.Token.Type.*
+import org.mechdancer.console.token.Token.Type.Number
 
 private infix fun <T> Iterable<Scanner<T>>.offer(char: T) = forEach { it(char) }
 private fun <T> Iterable<Scanner<T>>.reset() = forEach(Scanner<T>::reset)
@@ -37,7 +37,7 @@ private fun String.buildNumber() =
 private fun String.buildKey() =
 	if (this[1] == '{') drop(2).dropLast(1).trim() else drop(1)
 
-private infix fun <T> Map<Scanner<T>, TokenType>.build(text: String) =
+private infix fun <T> Map<Scanner<T>, Type>.build(text: String) =
 	when (val type = keys.summary()
 		                 ?.takeIf { it.length == text.length }
 		                 ?.let(this::get)
@@ -57,7 +57,7 @@ private infix fun <T> Map<Scanner<T>, TokenType>.build(text: String) =
 		}
 	}
 
-infix fun String.scanBy(pairs: Map<Scanner<Char>, TokenType>): Sentence {
+infix fun String.scanBy(pairs: Map<Scanner<Char>, Type>): Sentence {
 	val scanners = pairs.keys
 	val sentence = mutableListOf<Token<*>>()
 	var m = 0 // 当前单词开始位置
@@ -75,12 +75,4 @@ infix fun String.scanBy(pairs: Map<Scanner<Char>, TokenType>): Sentence {
 	return sentence
 }
 
-fun scan(string: String) = string scanBy TokenType.values().associate { Scanner[it]!! to it }
-
-fun main(args: Array<String>) {
-	scan("hello .12345+++++0x678.90 => ok! /*this is a note*/ @{look at me} @{num}  @{ } ++=>  ")
-		.forEach { println("${it.type}: \t$it") }
-
-	scan(":help")
-		.forEach { println("${it.type}: \t$it") }
-}
+fun scan(string: String) = string scanBy Type.values().associate { Scanner[it]!! to it }

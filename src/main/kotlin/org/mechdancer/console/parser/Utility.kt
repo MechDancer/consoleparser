@@ -1,7 +1,15 @@
 package org.mechdancer.console.parser
 
-import org.mechdancer.console.token.TokenType.*
-import org.mechdancer.console.token.TokenType.Number
+import org.mechdancer.console.parser.Parser.*
+import org.mechdancer.console.token.Token
+import org.mechdancer.console.token.Token.Type.*
+import org.mechdancer.console.token.Token.Type.Number
+
+/** 句子是词的列表 */
+typealias Sentence = List<Token<*>>
+
+/** 操作基于指令 */
+typealias Action = Sentence.() -> Any?
 
 /** 取出句子中所有数字 */
 val Sentence.numbers
@@ -23,12 +31,7 @@ val Sentence.keys
 fun buildParser(block: Parser.() -> Unit) =
 	Parser().apply(block)
 
-/** 显示指令反馈 */
-fun display(feedback: Pair<Boolean, Any?>) =
-	(if (feedback.first) System.out else System.err)
-		.println(feedback.second)
-
-//组织反馈信息
+/** 组织反馈信息 */
 fun feedback(result: Map.Entry<Sentence, *>): Pair<Boolean, *> {
 	val (sentence, data) = result
 	return when (data) {
@@ -51,3 +54,8 @@ fun feedback(result: Map.Entry<Sentence, *>): Pair<Boolean, *> {
 		else                    -> false to data
 	}
 }
+
+/** 显示指令反馈 */
+fun display(feedback: Pair<Boolean, Any?>) =
+	(if (feedback.first) System.out else System.err)
+		.println(feedback.second)
