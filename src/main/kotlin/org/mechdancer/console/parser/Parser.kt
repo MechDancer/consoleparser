@@ -1,6 +1,6 @@
 package org.mechdancer.console.parser
 
-import org.mechdancer.console.newScanner.scan
+import org.mechdancer.console.scanner.scan
 import org.mechdancer.console.token.Token
 import kotlin.math.min
 
@@ -21,17 +21,32 @@ class Parser {
 					.keys
 					.forEach { appendln(it.joinToString(" ")) }
 			}
+		},
+		scan(":do") to { user: Sentence ->
+			val matchers = userLibrary match user
+			matchers.successOrNull()?.let(userLibrary::get)?.swallow { it(user) }
+			?: matchers cannotMatch user
+			?: ParseException("unknown command \"${user.joinToString(" ")}\"")
 		}
 	)
 
-	/** 指令分析 */
+	/**
+	 * 指令分析
+	 * 区分内核指令和用户指令
+	 * @param sentence 已分词的句子
+	 * @return 内核部分 - 用户部分
+	 */
 	private fun analyze(sentence: Sentence) =
 		if (sentence.firstOrNull()?.toString() == ":")
 			sentence.take(2) to sentence.drop(2)
 		else
 			listOf<Token<*>>() to sentence
 
-	/** 添加规则和动作 */
+	/**
+	 * 添加规则和动作
+	 * @param example 规则范例文本
+	 * @param action  对应动作
+	 */
 	operator fun set(example: String, action: Action) {
 		scan(example)
 			// 有效
@@ -40,17 +55,8 @@ class Parser {
 			?.takeIf { rule -> userLibrary.none { equal(it.key.size, it.key[rule], rule.size) } }
 			// 存储
 			?.let { userLibrary[it] = action }
-		?: throw RuntimeException("rule \"$example\" already exist")
+		?: throw RuntimeException("rule \"$example\" is meaningless or already exist")
 	}
-
-	fun <T> T.letCatching(block: (T) -> Any?) =
-		let {
-			try {
-				block(it)
-			} catch (e: Throwable) {
-				e
-			}
-		}
 
 	// 解析并执行指令
 	private fun parse(sentence: Sentence): Any? {
@@ -58,41 +64,66 @@ class Parser {
 		val (core, user) = analyze(sentence)
 		//用户指令匹配
 		return if (core.isNotEmpty()) {
-			val cMatchers = coreLibrary match core
-			cMatchers.successOrNull()?.let(coreLibrary::get)?.letCatching { it(user) }
-			?: cMatchers cannotMatch sentence
+			val matchers = coreLibrary match core
+			matchers.successOrNull()?.let(coreLibrary::get)?.swallow { it(user) }
+			?: matchers cannotMatch sentence
 			?: ParseException("unknown core command \"${core.joinToString(" ")}\"")
 		} else {
-			val uMatchers = userLibrary match user
-			uMatchers.successOrNull()?.let(userLibrary::get)?.letCatching { it(user) }
-			?: uMatchers cannotMatch sentence
+			val matchers = userLibrary match user
+			matchers.successOrNull()?.let(userLibrary::get)?.swallow { it(user) }
+			?: matchers cannotMatch sentence
 			?: ParseException("unknown command \"${user.joinToString(" ")}\"")
 		}
 	}
 
-	/** 解析并执行指令 */
-	operator fun invoke(script: String): Map<Sentence, Any?> =
+	/**
+	 * 解析并执行指令
+	 * @param script 待解析脚本，用换行分句
+	 * @return 分句分词的指令及其执行结果
+	 */
+	operator fun invoke(script: String) =
 		script.reader()
 			.readLines()
 			.map(::scan)
 			.filterNot(Sentence::isEmpty)
-			.associate { it to parse(it) }
+			.map { it to parse(it) }
 
 	/**
 	 * 匹配结果
 	 * @param length  匹配长度
 	 * @param success 是否匹配成功
 	 */
-	private data class Matcher(
-		val length: Int,
-		val success: Boolean
-	)
+	private data class Matcher(val length: Int, val success: Boolean)
 
+	/**
+	 * 无法匹配
+	 * @param rule  最优匹配规则
+	 * @param where 匹配到的最长长度
+	 */
 	class CannotMatchException(val rule: Sentence, val where: Int) : IllegalArgumentException()
+
+	/**
+	 * 指令不全
+	 * @param rule 最优匹配规则
+	 */
 	class IncompleteException(val rule: Sentence) : IllegalArgumentException()
+
+	/**
+	 * 解析时异常
+	 * @param msg 异常信息
+	 */
 	class ParseException(msg: String) : IllegalArgumentException(msg)
 
 	private companion object {
+		// 吞下异常
+		@JvmStatic
+		fun <T> T.swallow(block: (T) -> Any?) =
+			try {
+				block(this)
+			} catch (e: Throwable) {
+				e
+			}
+
 		// 判断多个元素相等
 		@JvmStatic
 		fun <T> equal(vararg list: T) = list.distinct().size == 1

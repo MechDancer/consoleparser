@@ -1,4 +1,4 @@
-package org.mechdancer.console.newScanner
+package org.mechdancer.console.scanner
 
 import kotlin.math.abs
 

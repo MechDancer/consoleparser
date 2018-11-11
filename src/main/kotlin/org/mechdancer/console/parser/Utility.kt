@@ -34,7 +34,7 @@ fun buildParser(block: Parser.() -> Unit) =
 	Parser().apply(block)
 
 /** 组织反馈信息 */
-fun feedback(result: Map.Entry<Sentence, *>): Pair<Boolean, *> {
+fun feedback(result: Pair<Sentence, *>): Pair<Boolean, *> {
 	val (sentence, data) = result
 	return when (data) {
 		!is Throwable           -> true to data
@@ -65,6 +65,6 @@ fun feedback(result: Map.Entry<Sentence, *>): Pair<Boolean, *> {
 }
 
 /** 显示指令反馈 */
-fun display(feedback: Pair<Boolean, Any?>) =
+fun display(feedback: Pair<Boolean, *>) =
 	(if (feedback.first) System.out else System.err)
 		.println(feedback.second)

@@ -1,7 +1,7 @@
 
 import org.junit.Assert
 import org.junit.Test
-import org.mechdancer.console.newScanner.Scanner
+import org.mechdancer.console.scanner.Scanner
 import org.mechdancer.console.token.Token.Type.*
 import org.mechdancer.console.token.Token.Type.Number
 
