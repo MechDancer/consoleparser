@@ -6,30 +6,31 @@ import org.mechdancer.console.token.Token.Type
 import org.mechdancer.console.token.Token.Type.*
 import org.mechdancer.console.token.Token.Type.Number
 
-private infix fun <T> Iterable<Scanner<T>>.offer(char: T) = forEach { it(char) }
-private fun <T> Iterable<Scanner<T>>.reset() = forEach(Scanner<T>::reset)
-private fun <T> Iterable<Scanner<T>>.summary() = filter(Scanner<T>::complete).maxBy(Scanner<T>::length)
+private fun <T> Iterable<Scanner<T>>.offer(char: T) = forEach { it(char) }
 
+// 字符转数字
 private fun Char.toDigit() = when (this) {
     in '0'..'9' -> this - '0'
-    in 'a'..'f' -> this - 'a'
-    in 'A'..'F' -> this - 'A'
+    in 'a'..'z' -> this - 'a'
+    in 'A'..'Z' -> this - 'A'
     else        -> throw IllegalArgumentException("$this is not a digit")
 }
 
+// 字符串转数字
 private fun String.toDigit(order: Int) =
-    fold(.0 to 1.0) { state, it ->
-        if (state.second == 1.0)
-            if (it == '.') state.first to state.second / order
-            else state.first * order + it.toDigit() to 1.0
+    fold(.0 to 1.0) { (sum, step), it ->
+        if (step == 1.0)
+            if (it == '.') sum to step / order
+            else sum * order + it.toDigit() to 1.0
         else
-            state.first + it.toDigit() * state.second to state.second / order
+            sum + it.toDigit() * step to step / order
     }.first
 
+// 字符串转数字
 private fun String.buildNumber() =
-    if (length == 1 || get(1).isDigit()) toDouble()
+    if (length == 1 || get(1).isDigit() || get(1) == '.')
+        toDouble()
     else when (get(1)) {
-        '.'  -> toDouble()
         'b'  -> drop(2).toDigit(2)
         'x'  -> drop(2).toDigit(16)
         else -> throw RuntimeException()
@@ -39,7 +40,7 @@ private fun String.buildKey() =
     if (this[1] == '{') drop(2).dropLast(1).trim() else drop(1)
 
 private infix fun <T> Map<Scanner<T>, Type>.build(text: String) =
-    when (val type = keys.summary()
+    when (val type = keys.filter(Scanner<T>::complete).maxBy(Scanner<T>::length)
         ?.takeIf { it.length == text.length }
         ?.let(this::get)
         ?: throw RuntimeException("illegal token: $text")
@@ -65,11 +66,11 @@ infix fun String.scanBy(pairs: Map<Scanner<Char>, Type>): Sentence {
     var p = 0 // 当前扫描位置
 
     while (p < length) {
-        scanners offer this[p++]
+        scanners.offer(this[p++])
         if (scanners.any { m + it.length == p }) continue
         if (m < p - 1) sentence += pairs build substring(m, --p)
         m = p
-        scanners.reset()
+        scanners.forEach(Scanner<Char>::reset)
     }
     if (m < p) sentence += pairs build substring(m, p)
 
