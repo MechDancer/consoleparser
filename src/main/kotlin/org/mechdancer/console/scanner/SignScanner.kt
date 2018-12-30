@@ -6,49 +6,50 @@ package org.mechdancer.console.scanner
  * @param extensionSet 扩充符号集
  */
 class SignScanner(
-	private val extensionSet: Set<String> = defaultExtensionSet
+    private val extensionSet: Set<String> = defaultExtensionSet
 ) : Scanner<Char> {
-	private var state = 0
-	override val length get() = state.takeIf { it >= 0 } ?: -(state + 1)
-	override val complete get() = length > 0
+    private var state = 0
+    override val length get() = state.takeIf { it >= 0 } ?: -(state + 1)
+    override val complete get() = length > 0
 
-	private val buffer = CharArray(extensionSet.map(String::length).max() ?: 1)
+    private val buffer = CharArray(extensionSet.map(String::length).max() ?: 1)
 
-	override fun invoke(char: Char) {
-		if (state < 0) return
-		if (char !in signSet || state == buffer.size) {
-			state = -state - 1
-			return
-		}
-		buffer[state] = char
-		val current = String(buffer.copyOfRange(0, ++state))
-		if (state > 1 && extensionSet.none { it.startsWith(current) })
-			state = -state
-	}
+    override fun invoke(char: Char) {
+        if (state < 0) return
+        if (char !in signSet || state == buffer.size) {
+            state = -state - 1
+            return
+        }
+        buffer[state] = char
+        val current = String(buffer.copyOfRange(0, ++state))
+        if (state > 1 && extensionSet.none { it.startsWith(current) })
+            state = -state
+    }
 
-	override fun reset() {
-		state = 0
-	}
+    override fun reset() {
+        state = 0
+    }
 
-	companion object {
-		private val signSet = setOf(
-			'!', '?', '@', '#', '$',
-			'+', '-', '*', '/', '%', '^',
-			'&', '|', '~', '_', '=',
-			':', '<', '>', '.',
+    companion object {
+        private val signSet = setOf(
+            '!', '?', '@', '#', '$',
+            '+', '-', '*', '/', '%', '^',
+            '&', '|', '~', '_', '=',
+            ':', '<', '>', '.',
 
-			'`', '\'', '\"',
-			'(', ')', '[', ']', '{', '}',
-			';', ',', '\n')
+            '`', '\'', '\"',
+            '(', ')', '[', ']', '{', '}',
+            ';', ',', '\n'
+        )
 
-		val defaultExtensionSet =
-			setOf(
-				"++", "--", "**", "&&", "||",
-				"<<", ">>", "->", "<-",
-				"==", "!=", "===", "=/=",
-				"=>", "<=", "<=>",
-				"..", "...", "?.", "!!",
-				"<>", ":="
-			)
-	}
+        val defaultExtensionSet =
+            setOf(
+                "++", "--", "**", "&&", "||",
+                "<<", ">>", "->", "<-",
+                "==", "!=", "===", "=/=",
+                "=>", "<=>", "<=", ">=",
+                "..", "...", "?.", "??", "!!",
+                "<>", ":=", "@@", "/@", "/;"
+            )
+    }
 }
