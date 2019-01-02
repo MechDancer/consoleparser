@@ -40,10 +40,11 @@ private fun String.buildKey() =
     if (this[1] == '{') drop(2).dropLast(1).trim() else drop(1)
 
 private infix fun <T> Map<Scanner<T>, Type>.build(text: String) =
-    when (val type = keys.filter(Scanner<T>::complete).maxBy(Scanner<T>::length)
-        ?.takeIf { it.length == text.length }
-        ?.let(this::get)
-        ?: throw RuntimeException("illegal token: $text")
+    when (val type = keys.filter(Scanner<T>::complete)
+                         .maxBy(Scanner<T>::length)
+                         ?.takeIf { it.length == text.length }
+                         ?.let(this::get)
+                     ?: throw RuntimeException("illegal token: $text")
         ) {
         Number -> Token(type, text.buildNumber())
         Sign   -> Token(type, text)
@@ -51,10 +52,10 @@ private infix fun <T> Map<Scanner<T>, Type>.build(text: String) =
         Note   -> Token(type, text.trim())
         Key    -> text.buildKey().let {
             when (it) {
-                "num"  -> Token(Number, "[num]")
-                "word" -> Token(Word, "[word]")
-                "sign" -> Token(Sign, "[sign]")
-                else   -> Token(Key, "[key]")
+                "num"  -> Token(Number, Unit)
+                "word" -> Token(Word, "")
+                "sign" -> Token(Sign, "")
+                else   -> Token(Key, it)
             }
         }
     }

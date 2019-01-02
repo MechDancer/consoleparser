@@ -69,6 +69,7 @@ class TestNewScanner {
 	@Test
 	fun testSign() {
 		listOf(
+			1 to true to "+",
 			3 to true to "===",
 			1 to true to "!",
 			0 to false to "123",

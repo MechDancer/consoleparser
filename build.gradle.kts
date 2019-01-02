@@ -14,7 +14,7 @@ buildscript {
 
 plugins {
 	kotlin("jvm") version "1.3.11"
-	id("org.jetbrains.dokka") version "0.9.16"
+	id("org.jetbrains.dokka") version "0.9.17"
 }
 
 apply {
@@ -22,7 +22,7 @@ apply {
 }
 
 group = "org.mechdancer"
-version = "0.1.8"
+version = "0.1.9"
 
 repositories {
 	mavenCentral()
